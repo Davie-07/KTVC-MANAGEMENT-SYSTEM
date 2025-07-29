@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import { authenticate } from '../middleware/auth';
 import Notification from '../models/Notification';
 

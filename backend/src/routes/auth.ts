@@ -1,11 +1,11 @@
-import { Router } from 'express';
+import express from 'express';
+import bcrypt from 'bcryptjs';
 import User from '../models/User';
-import * as bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/sendEmail';
-import * as jwt from 'jsonwebtoken';
 import { authenticate, requireAdmin, AuthRequest } from '../middleware/auth';
 
-const router = Router();
+const router = express.Router();
 
 function generateVerificationCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();

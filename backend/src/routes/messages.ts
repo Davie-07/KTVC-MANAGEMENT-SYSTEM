@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import mongoose from 'mongoose';
 import { authenticate } from '../middleware/auth';
 import Message from '../models/Message';

@@ -1,4 +1,4 @@
-import * as nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
 
 // Create transporter function to ensure environment variables are loaded
 function createTransporter() {
