@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 import './RegisterPage.css';
 
 const courseLevels = ['Level 4', 'Level 5', 'Level 6'];
@@ -42,7 +43,7 @@ const RegisterPage: React.FC = () => {
     setError(null);
     
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register', {
+      const res = await fetch(API_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

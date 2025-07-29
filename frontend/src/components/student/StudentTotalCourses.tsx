@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 const StudentTotalCourses: React.FC = () => {
   const { token } = useAuth();
@@ -12,7 +13,7 @@ const StudentTotalCourses: React.FC = () => {
         setLoading(true);
         
         // Fetch all published courses
-        const response = await fetch(`http://localhost:5000/api/course/published`, {
+        const response = await fetch(API_ENDPOINTS.PUBLISHED_COURSES, {
           headers: { Authorization: `Bearer ${token}` }
         });
         

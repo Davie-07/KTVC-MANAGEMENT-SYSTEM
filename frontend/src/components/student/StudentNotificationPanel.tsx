@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Notification {
   id: string;
@@ -31,11 +32,11 @@ const StudentNotificationPanel: React.FC = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/notification/student/${user?.id}`, {
+      const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}/student/${user?.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (response.ok) {
-        const data = await response.json();
+      if (res.ok) {
+        const data = await res.json();
         setNotifications(data);
       }
     } catch (error) {
@@ -45,18 +46,13 @@ const StudentNotificationPanel: React.FC = () => {
 
   const markAsRead = async (notificationId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/notification/${notificationId}/read`, {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
+      await fetch(`${API_ENDPOINTS.NOTIFICATIONS}/${notificationId}/read`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
       });
-      if (response.ok) {
-        setNotifications(prev => 
-          prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
-        );
-      }
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+      );
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -64,16 +60,11 @@ const StudentNotificationPanel: React.FC = () => {
 
   const markAllAsRead = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/notification/student/${user?.id}/read-all`, {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
+      await fetch(`${API_ENDPOINTS.NOTIFICATIONS}/student/${user?.id}/read-all`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
       });
-      if (response.ok) {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      }
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }

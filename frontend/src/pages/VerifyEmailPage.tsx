@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 import './VerifyEmailPage.css';
 
 const VerifyEmailPage: React.FC = () => {
@@ -44,7 +45,7 @@ const VerifyEmailPage: React.FC = () => {
     setError(null);
     
     try {
-      const res = await fetch('http://localhost:5000/api/auth/verify-email', {
+      const res = await fetch(API_ENDPOINTS.VERIFY_EMAIL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

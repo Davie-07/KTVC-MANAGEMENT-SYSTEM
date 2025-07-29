@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 const quotes = [
   'Teaching is the greatest act of optimism.',
@@ -33,7 +34,7 @@ const TeacherGreetingCard: React.FC = () => {
     setLoading(true);
     
     // Fetch today's classes
-    fetch(`http://localhost:5000/api/class/teacher-today/${user.id}`, {
+    fetch(`${API_ENDPOINTS.CLASSES}/teacher-today/${user.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -42,7 +43,7 @@ const TeacherGreetingCard: React.FC = () => {
 
     // Fetch student count for teacher's course
     if (user.course) {
-      fetch(`http://localhost:5000/api/auth/students/course/${encodeURIComponent(user.course)}`, {
+      fetch(`${API_ENDPOINTS.STUDENTS}/course/${encodeURIComponent(user.course)}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => res.json())

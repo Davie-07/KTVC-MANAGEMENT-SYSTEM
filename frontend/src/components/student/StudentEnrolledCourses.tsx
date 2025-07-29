@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface CourseInfo {
   name: string;
@@ -28,7 +29,7 @@ const StudentEnrolledCourses: React.FC = () => {
         const studentDuration = (user as any)?.courseDuration || '1 Year';
         
         // Fetch course details for name
-        const response = await fetch(`http://localhost:5000/api/course/name/${encodeURIComponent(user.course)}`, {
+        const response = await fetch(`${API_ENDPOINTS.COURSES}/name/${encodeURIComponent(user.course)}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         

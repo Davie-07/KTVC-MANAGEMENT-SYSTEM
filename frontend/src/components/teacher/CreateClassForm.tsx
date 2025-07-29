@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface UserOption {
   _id: string;
@@ -25,8 +26,8 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
   useEffect(() => {
     setLoadingOptions(true);
     Promise.all([
-      fetch('http://localhost:5000/api/class/teachers', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
-      fetch('http://localhost:5000/api/exam-result/students', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json())
+      fetch(`${API_ENDPOINTS.CLASSES}/teachers`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
+      fetch(`${API_ENDPOINTS.EXAM_RESULTS}/students`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json())
     ])
       .then(([teachersData, studentsData]) => {
         setTeachers(Array.isArray(teachersData) ? teachersData : []);
@@ -66,7 +67,7 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
     setSuccess(null);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5000/api/class/publish', {
+      const res = await fetch(API_ENDPOINTS.PUBLISH_CLASS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +91,7 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
         // Create notifications for assigned students
         if (form.students.length > 0) {
           try {
-            await fetch('http://localhost:5000/api/notification', {
+            await fetch(API_ENDPOINTS.NOTIFICATIONS, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

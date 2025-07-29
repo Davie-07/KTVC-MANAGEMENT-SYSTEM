@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 const StudentTodaysClasses: React.FC = () => {
   const { user, token } = useAuth();
@@ -16,7 +17,7 @@ const StudentTodaysClasses: React.FC = () => {
         }
         
         // Fetch today's classes for student
-        const response = await fetch(`http://localhost:5000/api/class/student-today/${user.id}`, {
+        const response = await fetch(`${API_ENDPOINTS.STUDENT_CLASSES}/${user.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         

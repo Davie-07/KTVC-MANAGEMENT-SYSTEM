@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Tuchat from './Tuchat';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 import './TuchatButton.css';
 
 interface TuchatButtonProps {
@@ -16,12 +17,12 @@ const TuchatButton: React.FC<TuchatButtonProps> = ({ onClick, isVisible = true }
   // Fetch unread message count
   const fetchUnreadCount = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/messages/unread/count', {
+      const res = await fetch(`${API_ENDPOINTS.MESSAGES}/unread/count`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (response.ok) {
-        const data = await response.json();
+      if (res.ok) {
+        const data = await res.json();
         setUnreadCount(data.count);
       }
     } catch (error) {

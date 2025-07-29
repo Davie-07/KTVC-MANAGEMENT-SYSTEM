@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 import StatisticsCard from './StatisticsCard';
 
 interface AdminDashboardStatsProps {
@@ -16,14 +17,14 @@ const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({ onTabChange }
     const fetchStats = async () => {
       try {
         // Fetch teachers count
-        const teachersResponse = await fetch('http://localhost:5000/api/auth/teachers', {
+        const teachersResponse = await fetch(API_ENDPOINTS.TEACHERS, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const teachersData = await teachersResponse.json();
         setTeacherCount(Array.isArray(teachersData) ? teachersData.length : 0);
 
         // Fetch students count (we'll need to create this endpoint or use existing one)
-        const studentsResponse = await fetch('http://localhost:5000/api/auth/students', {
+        const studentsResponse = await fetch(API_ENDPOINTS.STUDENTS, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const studentsData = await studentsResponse.json();

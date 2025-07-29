@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 import './ForgotPasswordPage.css';
 
 const ForgotPasswordPage: React.FC = () => {
@@ -13,7 +14,7 @@ const ForgotPasswordPage: React.FC = () => {
     setMessage(null);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/forgot-password', {
+      const res = await fetch(API_ENDPOINTS.FORGOT_PASSWORD, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

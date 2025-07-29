@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface ChatMessage {
   from: 'user' | 'dave';
@@ -21,7 +22,7 @@ const AskDave: React.FC = () => {
     setInput('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/ask-dave', {
+      const res = await fetch(API_ENDPOINTS.ASK_DAVE, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

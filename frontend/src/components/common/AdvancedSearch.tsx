@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
+import './AdvancedSearch.css';
 
 interface SearchResult {
   id: string;
@@ -36,7 +38,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ userRole, onResultSelec
         // Search users (students/teachers)
         if (searchType === 'all' || searchType === 'users') {
           if (userRole === 'admin') {
-            const studentsResponse = await fetch(`http://localhost:5000/api/auth/students?search=${searchTerm}`, {
+            const studentsResponse = await fetch(`${API_ENDPOINTS.STUDENTS}?search=${searchTerm}`, {
               headers: { Authorization: `Bearer ${token}` }
             });
             const studentsData = await studentsResponse.json();
@@ -52,7 +54,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ userRole, onResultSelec
               });
             }
 
-            const teachersResponse = await fetch(`http://localhost:5000/api/auth/teachers?search=${searchTerm}`, {
+            const teachersResponse = await fetch(`${API_ENDPOINTS.TEACHERS}?search=${searchTerm}`, {
               headers: { Authorization: `Bearer ${token}` }
             });
             const teachersData = await teachersResponse.json();
@@ -72,9 +74,9 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ userRole, onResultSelec
 
         // Search courses
         if (searchType === 'all' || searchType === 'courses') {
-          let coursesEndpoint = `http://localhost:5000/api/course?search=${searchTerm}`;
+          let coursesEndpoint = `${API_ENDPOINTS.COURSES}?search=${searchTerm}`;
           if (userRole === 'teacher') {
-            coursesEndpoint = `http://localhost:5000/api/course/published?search=${searchTerm}`;
+            coursesEndpoint = `${API_ENDPOINTS.PUBLISHED_COURSES}?search=${searchTerm}`;
           }
           
           const coursesResponse = await fetch(coursesEndpoint, {
@@ -96,7 +98,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ userRole, onResultSelec
 
         // Search classes
         if (searchType === 'all' || searchType === 'classes') {
-          const classesResponse = await fetch(`http://localhost:5000/api/class?search=${searchTerm}`, {
+          const classesResponse = await fetch(`${API_ENDPOINTS.CLASSES}?search=${searchTerm}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const classesData = await classesResponse.json();
