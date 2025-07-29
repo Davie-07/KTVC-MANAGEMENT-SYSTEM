@@ -15,7 +15,15 @@ const Header: React.FC = () => {
     <header className="header">
       <div className="header-left">KTVC</div>
       <div className="header-center">
-        <img src="/KTVC-LOGO.png" alt="School Logo" className="school-logo" />
+        <img 
+          src="/KTVC-LOGO.png" 
+          alt="School Logo" 
+          className="school-logo" 
+          onError={(e) => {
+            console.error('Failed to load logo:', e);
+            e.currentTarget.style.display = 'none';
+          }}
+        />
         <span className="school-name">KANDARA TECHNICAL COLLEGE</span>
       </div>
       <div className="header-right">

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface GrowthData {
@@ -30,7 +31,7 @@ const GrowthCharts: React.FC = () => {
         setLoading(true);
         
         // Fetch real growth data from the backend
-        const response = await fetch('http://localhost:5000/api/system/growth-data', {
+        const response = await fetch(`${API_ENDPOINTS.SYSTEM}/growth-data`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -44,7 +45,7 @@ const GrowthCharts: React.FC = () => {
 
         // Fetch real student progress data if user is a student
         if (user?.role === 'student') {
-          const progressResponse = await fetch(`http://localhost:5000/api/exam-result/student/${user.id}`, {
+          const progressResponse = await fetch(`${API_ENDPOINTS.EXAM_RESULTS}/student/${user.id}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           

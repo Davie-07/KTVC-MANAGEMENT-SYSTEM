@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface ClassItem {
   _id: string;
@@ -20,7 +21,7 @@ const StudentCalendar: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    fetch(`http://localhost:5000/api/class/student/${user.id}`, {
+    fetch(`${API_ENDPOINTS.CLASSES}/student/${user.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -34,15 +35,14 @@ const StudentCalendar: React.FC = () => {
   const markAsSeen = async (classId: string) => {
     if (!user || !user.id) return;
     setMarking(classId);
-    await fetch(`http://localhost:5000/api/class/${classId}/seen`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ studentId: user.id })
+    await fetch(`${API_ENDPOINTS.CLASSES}/${classId}/seen`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` }
     });
     setMarking(null);
     // Refresh list
     if (!user || !user.id) return;
-    fetch(`http://localhost:5000/api/class/student/${user?.id || ''}`, {
+    fetch(`${API_ENDPOINTS.CLASSES}/student/${user?.id || ''}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())

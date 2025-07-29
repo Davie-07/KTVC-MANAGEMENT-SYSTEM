@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 interface ExamResult {
@@ -19,7 +20,7 @@ const ExamResultsChart: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    fetch(`http://localhost:5000/api/exam-result/student/${user.id}`, {
+    fetch(`${API_ENDPOINTS.EXAM_RESULTS}/student/${user.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
