@@ -46,9 +46,9 @@ const StudentEnrolledCourses: React.FC = () => {
         console.error('Error fetching course info:', error);
         // Fallback to user's course data
         setCourseInfo({
-          name: user.course || 'Not Assigned',
-          level: user.level || 'Level 1',
-          duration: user.courseDuration || '1 Year'
+          name: user?.course || 'Not Assigned',
+          level: user?.level || 'Level 1',
+          duration: user?.courseDuration || '1 Year'
         });
       } finally {
         setLoading(false);

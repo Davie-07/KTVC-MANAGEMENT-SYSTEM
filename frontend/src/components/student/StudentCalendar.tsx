@@ -42,7 +42,7 @@ const StudentCalendar: React.FC = () => {
     setMarking(null);
     // Refresh list
     if (!user || !user.id) return;
-    fetch(`http://localhost:5000/api/class/student/${user.id || ''}`, {
+    fetch(`http://localhost:5000/api/class/student/${user?.id || ''}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -64,7 +64,7 @@ const StudentCalendar: React.FC = () => {
       ) : (
         <ul style={{paddingLeft:0,listStyle:'none'}}>
           {classes.map(cls => {
-            const isUnseen = cls.notifiedStudents && cls.notifiedStudents.includes(user?.id);
+            const isUnseen = cls.notifiedStudents && cls.notifiedStudents.includes(user?.id || '');
             return (
               <li key={cls._id} style={{marginBottom:'0.7rem',background:isUnseen ? '#1e293b' : '#18181b',borderRadius:8,padding:'0.7rem',border:isUnseen ? '2px solid #2563eb' : undefined}}>
                 <b>{cls.title}</b> ({cls.course})<br/>

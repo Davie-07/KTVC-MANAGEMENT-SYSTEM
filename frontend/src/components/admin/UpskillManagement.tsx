@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
 interface Upskill {
   _id: string;
@@ -13,7 +12,6 @@ interface Upskill {
 }
 
 const UpskillManagement: React.FC = () => {
-  const { user } = useAuth();
   const [upskills, setUpskills] = useState<Upskill[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

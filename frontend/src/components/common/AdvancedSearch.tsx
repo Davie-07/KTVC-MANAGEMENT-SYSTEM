@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
 interface SearchResult {
   id: string;
@@ -15,7 +14,6 @@ interface AdvancedSearchProps {
 }
 
 const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ userRole, onResultSelect }) => {
-  const { user } = useAuth();
   const token = localStorage.getItem('token');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState<'all' | 'users' | 'courses' | 'classes'>('all');

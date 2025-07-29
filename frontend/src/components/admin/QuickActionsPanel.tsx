@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
 interface Notification {
   id: string;
@@ -11,7 +10,6 @@ interface Notification {
 }
 
 const QuickActionsPanel: React.FC = () => {
-  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showPanel, setShowPanel] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);

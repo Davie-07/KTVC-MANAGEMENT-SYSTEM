@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
 interface AcademicFee {
   _id: string;
@@ -10,7 +9,6 @@ interface AcademicFee {
 }
 
 const AcademicFeeManagement: React.FC = () => {
-  const { token } = useAuth();
   const [fees, setFees] = useState<AcademicFee[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

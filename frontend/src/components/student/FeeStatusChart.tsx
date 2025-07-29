@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 const COLORS = ['#22c55e', '#ef4444', '#f59e0b'];
 
@@ -83,8 +83,8 @@ const FeeStatusChart: React.FC = () => {
                 paddingAngle={2}
                 dataKey="value"
               >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                {data.map((entry, _index) => (
+                  <Cell key={`cell-${_index}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
@@ -92,7 +92,7 @@ const FeeStatusChart: React.FC = () => {
           </ResponsiveContainer>
           
           <div className="chart-legend">
-            {data.map((entry, index) => (
+            {data.map((entry) => (
               <div key={entry.name} className="legend-item">
                 <div 
                   className="legend-color" 

@@ -120,21 +120,6 @@ const ManageStudents: React.FC = () => {
     }
   };
 
-  const removeFromClass = async (studentId: string, classId: string) => {
-    try {
-      const response = await axios.delete(`http://localhost:5000/api/class/${classId}/student/${studentId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.status === 200) {
-        setSuccess('Student removed from class successfully');
-        fetchStudents(); // Refresh
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to remove student from class');
-    }
-  };
-
   return (
     <div style={{ padding: '2rem', background: '#0f0f23', minHeight: '100vh', color: '#fff' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>

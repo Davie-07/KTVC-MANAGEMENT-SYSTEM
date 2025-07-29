@@ -13,7 +13,7 @@ const StudentNotificationPanel: React.FC = () => {
   const { user, token } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

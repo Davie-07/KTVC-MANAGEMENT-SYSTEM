@@ -15,7 +15,6 @@ const DataExport: React.FC<DataExportProps> = ({ userRole, dataType }) => {
     setExporting(true);
     try {
       let endpoint = '';
-      let params = '';
 
       // Determine endpoint based on user role and data type
       switch (dataType) {
