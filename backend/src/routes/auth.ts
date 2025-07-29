@@ -96,8 +96,8 @@ router.post('/verify-email', async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired verification code.' });
     }
     user.isVerified = true;
-    user.verificationCode = undefined;
-    user.verificationCodeExpires = undefined;
+    user.verificationCode = undefined as any;
+    user.verificationCodeExpires = undefined as any;
     await user.save();
     res.json({ message: 'Email verified successfully.' });
   } catch (err) {
@@ -183,8 +183,8 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired code.' });
     }
     user.password = await bcrypt.hash(newPassword, 10);
-    user.verificationCode = undefined;
-    user.verificationCodeExpires = undefined;
+    user.verificationCode = undefined as any;
+    user.verificationCodeExpires = undefined as any;
     await user.save();
     res.json({ message: 'Password reset successful.' });
   } catch (err) {

@@ -30,7 +30,7 @@ app.use(express.json());
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI as string)
   .then(() => console.log('✅ MongoDB connected'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err));
+  .catch((err: any) => console.error('❌ MongoDB connection error:', err));
 
 // Verify email configuration
 verifyEmailConfig()
@@ -41,7 +41,7 @@ verifyEmailConfig()
       console.log('⚠️ Email service is not configured properly');
     }
   })
-  .catch((error) => {
+  .catch((error: any) => {
     console.log('⚠️ Email configuration check failed:', error);
   });
 
@@ -51,7 +51,7 @@ app.get('/clear-users', async (req, res) => {
     const User = mongoose.model('User');
     const result = await User.deleteMany({});
     res.json({ message: `Cleared ${result.deletedCount} users from database` });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: 'Error clearing users', error: error.message });
   }
 });
@@ -63,7 +63,7 @@ app.get('/clear-test-users', async (req, res) => {
       email: { $regex: /test|example|temp|fake/, $options: 'i' }
     });
     res.json({ message: `Cleared ${result.deletedCount} test users from database` });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: 'Error clearing test users', error: error.message });
   }
 });
