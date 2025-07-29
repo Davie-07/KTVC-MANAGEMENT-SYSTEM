@@ -1,0 +1,8 @@
+.main-content {
+  flex: 1;
+  padding: 1.2rem;
+  background: #18181b;
+  color: #fff;
+  min-height: 100vh;
+  font-size: 0.98rem;
+} 
