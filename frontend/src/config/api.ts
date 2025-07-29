@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   VALIDATE_TOKEN: `${API_BASE_URL}/api/auth/validate`,
   FORGOT_PASSWORD: `${API_BASE_URL}/api/auth/forgot-password`,
   RESET_PASSWORD: `${API_BASE_URL}/api/auth/reset-password`,
+  AUTH: `${API_BASE_URL}/api/auth`,
   
   // Users
   TEACHERS: `${API_BASE_URL}/api/auth/teachers`,
@@ -44,7 +45,28 @@ export const API_ENDPOINTS = {
   ASK_DAVE: `${API_BASE_URL}/api/ask-dave`,
   
   // Health Check
-  HEALTH: `${API_BASE_URL}/api/health`
+  HEALTH: `${API_BASE_URL}/api/health`,
+  
+  // Announcements
+  ANNOUNCEMENTS: `${API_BASE_URL}/api/announcement`,
+  
+  // Fee Status
+  FEE_STATUS: `${API_BASE_URL}/api/fee-status`,
+  
+  // Academic Calendar
+  ACADEMIC_CALENDAR: `${API_BASE_URL}/api/academic-calendar`,
+  
+  // Academic Fee
+  ACADEMIC_FEE: `${API_BASE_URL}/api/academic-fee`,
+  
+  // Friends
+  FRIENDS: `${API_BASE_URL}/api/friends`,
+  
+  // Student Fee
+  STUDENT_FEE: `${API_BASE_URL}/api/student-fee`,
+  
+  // System
+  SYSTEM: `${API_BASE_URL}/api/system`
 };
 
 export default API_ENDPOINTS; 

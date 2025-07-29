@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 
 interface User {
   id: string;
@@ -35,8 +36,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/validate', {
-        headers: { Authorization: `Bearer ${storedToken}` }
+      const response = await fetch(API_ENDPOINTS.VALIDATE_TOKEN, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       if (response.ok) {

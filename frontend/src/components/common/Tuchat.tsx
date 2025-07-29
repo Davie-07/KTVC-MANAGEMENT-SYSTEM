@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 import './Tuchat.css';
 
 interface User {
@@ -49,13 +50,13 @@ const Tuchat: React.FC = () => {
   useEffect(() => {
     const updateOnlineStatus = async (isOnline: boolean) => {
       try {
-        await fetch('http://localhost:5000/api/auth/online-status', {
+        await fetch(`${API_ENDPOINTS.AUTH}/online-status`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
+            'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ isOnline })
+          body: JSON.stringify({ isOnline: true })
         });
       } catch (err) {
         console.error('Failed to update online status:', err);
@@ -81,7 +82,7 @@ const Tuchat: React.FC = () => {
 
     const pollUserStatus = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/messages/users', {
+        const response = await fetch(`${API_ENDPOINTS.MESSAGES}/users`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -105,7 +106,7 @@ const Tuchat: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/messages/users', {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGES}/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -125,7 +126,7 @@ const Tuchat: React.FC = () => {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/messages/conversations', {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGES}/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -144,7 +145,7 @@ const Tuchat: React.FC = () => {
   // Fetch messages between current user and selected user
   const fetchMessages = async (userId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/messages/${userId}`, {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGES}/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -163,13 +164,13 @@ const Tuchat: React.FC = () => {
     if (!selectedUser || !newMessage.trim()) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/messages/${selectedUser._id}`, {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGES}/${selectedUser._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ content: newMessage.trim() })
+        body: JSON.stringify({ content: newMessage })
       });
 
       if (!response.ok) throw new Error('Failed to send message');
