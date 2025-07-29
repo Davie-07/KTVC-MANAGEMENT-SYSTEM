@@ -22,6 +22,38 @@ router.get('/status', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+// Growth data endpoint
+router.get('/growth-data', authenticate, async (req, res) => {
+  try {
+    // Mock growth data - in real app, calculate from actual data
+    const growthData = {
+      studentGrowth: [
+        { month: 'Jan', count: 120 },
+        { month: 'Feb', count: 135 },
+        { month: 'Mar', count: 142 },
+        { month: 'Apr', count: 158 },
+        { month: 'May', count: 165 },
+        { month: 'Jun', count: 172 }
+      ],
+      courseEnrollment: [
+        { course: 'ICT', count: 45 },
+        { course: 'Engineering', count: 38 },
+        { course: 'Business', count: 32 },
+        { course: 'Science', count: 28 }
+      ],
+      performanceMetrics: {
+        averageScore: 78.5,
+        passRate: 92.3,
+        attendanceRate: 88.7
+      }
+    };
+    
+    res.json(growthData);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch growth data' });
+  }
+});
+
 // System settings endpoint
 router.get('/settings', authenticate, requireAdmin, async (req, res) => {
   try {
