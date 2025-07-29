@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CreateAnnouncementForm from '../components/teacher/CreateAnnouncementForm';
 import CreateExamResultForm from '../components/teacher/CreateExamResultForm';
 import ExamResultsList from '../components/teacher/ExamResultsList';
@@ -10,16 +10,16 @@ import AdminDashboardStats from '../components/admin/AdminDashboardStats';
 import EnhancedStats from '../components/admin/EnhancedStats';
 import AdvancedSearch from '../components/common/AdvancedSearch';
 import DataExport from '../components/common/DataExport';
-import SystemManagement from '../components/admin/SystemManagement';
-import UserManagement from '../components/admin/UserManagement';
-import GrowthCharts from '../components/common/GrowthCharts';
-import Footer from '../components/Footer';
+import Tuchat from '../components/common/Tuchat';
 import { useAuth } from '../context/AuthContext';
 import AcademicCalendarManagement from '../components/admin/AcademicCalendarManagement';
 import AcademicFeeManagement from '../components/admin/AcademicFeeManagement';
 import UpskillManagement from '../components/admin/UpskillManagement';
 import TeachersManagement from '../components/admin/TeachersManagement';
-import Tuchat from '../components/common/Tuchat';
+import StudentsManagement from '../components/admin/StudentsManagement';
+import CoursesManagement from '../components/admin/CoursesManagement';
+import GrowthCharts from '../components/common/GrowthCharts';
+import Footer from '../components/Footer';
 
 const FeesManagement = () => <div style={{color:'#fff'}}>Fees Management (View/Edit All Students' Fees)</div>;
 const ClassesManagement = () => <div style={{color:'#fff'}}>Classes Management (View/Edit All Classes)</div>;
@@ -86,7 +86,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ activeTab, onTabChange 
       mainContent = <UpskillManagement />;
       break;
     case 'users':
-      mainContent = <UserManagement />;
+      mainContent = <StudentsManagement />;
       break;
     case 'fees':
       mainContent = <FeesManagement />;

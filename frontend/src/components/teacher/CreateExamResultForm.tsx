@@ -24,7 +24,7 @@ const CreateExamResultForm: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [studentSearch, setStudentSearch] = useState('');
   const [studentsLoading, setStudentsLoading] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedStudent, _setSelectedStudent] = useState<string>('');
   const [history, setHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
@@ -92,7 +92,7 @@ const CreateExamResultForm: React.FC = () => {
       const [cam, field] = name.split('.');
       setForm(prev => ({
         ...prev,
-        [cam]: { ...prev[cam as keyof typeof prev], [field]: value }
+        [cam]: { ...(prev[cam as keyof typeof prev] as any), [field]: value }
       }));
     } else {
       setForm(prev => ({ ...prev, [name]: value }));

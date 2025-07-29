@@ -33,6 +33,7 @@ const ManageStudents: React.FC = () => {
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [selectedClass, setSelectedClass] = useState('');
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [removeFromClass, _setRemoveFromClass] = useState<string>('');
 
   useEffect(() => {
     fetchStudents();

@@ -82,7 +82,7 @@ const TeacherCalendar: React.FC = () => {
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, selectedOptions } = e.target as HTMLInputElement & HTMLSelectElement;
+    const { name, value, selectedOptions } = e.target as HTMLInputElement & HTMLSelectElement;
     if (name === 'students') {
       const values = Array.from(selectedOptions).map(opt => opt.value);
       setForm((prev: any) => ({ ...prev, students: values }));
@@ -124,7 +124,7 @@ const TeacherCalendar: React.FC = () => {
   };
 
   const handleCreateFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, selectedOptions } = e.target as HTMLInputElement & HTMLSelectElement;
+    const { name, value, selectedOptions } = e.target as HTMLInputElement & HTMLSelectElement;
     if (name === 'students') {
       const values = Array.from(selectedOptions).map(opt => opt.value);
       setCreateForm((prev: any) => ({ ...prev, students: values }));

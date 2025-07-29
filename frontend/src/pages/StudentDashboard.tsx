@@ -1,23 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import GreetingCard from '../components/student/GreetingCard';
-import Announcements from '../components/student/Announcements';
-import StudentCalendar from '../components/student/StudentCalendar';
-import ExamResultsChart from '../components/student/ExamResultsChart';
-import FeeStatusChart from '../components/student/FeeStatusChart';
-import Friends from '../components/student/Friends';
-import AskDave from '../components/student/AskDave';
-import Settings from '../components/Settings';
-import EnhancedStats from '../components/admin/EnhancedStats';
-import AdvancedSearch from '../components/common/AdvancedSearch';
-import DataExport from '../components/common/DataExport';
-import GrowthCharts from '../components/common/GrowthCharts';
-import StudentNotificationPanel from '../components/student/StudentNotificationPanel';
-import Footer from '../components/Footer';
-import { useAuth } from '../context/AuthContext';
 import StudentEnrolledCourses from '../components/student/StudentEnrolledCourses';
 import StudentTodaysClasses from '../components/student/StudentTodaysClasses';
 import StudentTotalCourses from '../components/student/StudentTotalCourses';
+import FeeStatusChart from '../components/student/FeeStatusChart';
+import StudentCalendar from '../components/student/StudentCalendar';
+import ExamResultsChart from '../components/student/ExamResultsChart';
+import GrowthCharts from '../components/common/GrowthCharts';
+import AdvancedSearch from '../components/common/AdvancedSearch';
+import DataExport from '../components/common/DataExport';
 import Tuchat from '../components/common/Tuchat';
+import { useAuth } from '../context/AuthContext';
 
 interface StudentDashboardProps {
   activeTab: string;
@@ -77,13 +70,13 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ activeTab }) => {
       );
       break;
     case 'announcements':
-      mainContent = <Announcements />;
+      mainContent = <div style={{color:'#fff'}}>Announcements Component (Coming Soon)</div>;
       break;
     case 'classes':
       mainContent = <StudentCalendar />;
       break;
     case 'friends':
-      mainContent = <Friends />;
+      mainContent = <div style={{color:'#fff'}}>Friends Component (Coming Soon)</div>;
       break;
     case 'messages':
       mainContent = <div style={{color:'#fff'}}>Messages Component (Coming Soon)</div>;
@@ -95,13 +88,13 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ activeTab }) => {
       mainContent = <div style={{color:'#fff'}}>Refer and Earn (Coming Soon)</div>;
       break;
     case 'ask-dave':
-      mainContent = <AskDave />;
+      mainContent = <div style={{color:'#fff'}}>Ask Dave (Coming Soon)</div>;
       break;
     case 'tuchat':
       mainContent = <Tuchat />;
       break;
     case 'settings':
-      mainContent = <Settings />;
+      mainContent = <div style={{color:'#fff'}}>Settings Component (Coming Soon)</div>;
       break;
     default:
       mainContent = <div style={{color:'#fff'}}>Select a tab from the sidebar.</div>;

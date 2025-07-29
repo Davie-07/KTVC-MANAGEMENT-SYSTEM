@@ -71,12 +71,6 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const toggleLoginMode = () => {
-    setLoginMode(loginMode === 'email' ? 'teacherId' : 'email');
-    setForm({ email: '', teacherId: '', password: '' });
-    setError(null);
-  };
-
   return (
     <div className="login-bg">
       <form className="login-form" onSubmit={handleSubmit}>
