@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Announcement {
   _id: string;
@@ -17,7 +18,7 @@ const Announcements: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/api/announcement/student')
+    fetch(`${API_ENDPOINTS.ANNOUNCEMENTS}/student`)
       .then(res => res.json())
       .then(data => setAnnouncements(Array.isArray(data) ? data : []))
       .catch(() => setAnnouncements([]))
@@ -29,14 +30,15 @@ const Announcements: React.FC = () => {
   const markAsSeen = async (announcementId: string) => {
     if (!user || !user.id) return;
     setMarking(announcementId);
-    await fetch(`http://localhost:5000/api/announcement/${announcementId}/seen`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id })
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    await fetch(`${API_ENDPOINTS.ANNOUNCEMENTS}/${announcementId}/seen`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` }
     });
     setMarking(null);
     // Refresh list
-    fetch('http://localhost:5000/api/announcement/student')
+    fetch(`${API_ENDPOINTS.ANNOUNCEMENTS}/student`)
       .then(res => res.json())
       .then(data => setAnnouncements(Array.isArray(data) ? data : []));
   };

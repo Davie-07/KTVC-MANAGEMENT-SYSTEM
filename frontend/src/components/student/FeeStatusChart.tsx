@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 const COLORS = ['#22c55e', '#ef4444', '#f59e0b'];
@@ -12,7 +13,7 @@ const FeeStatusChart: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    fetch(`http://localhost:5000/api/fee-status/student/${user.id}`, {
+    fetch(`${API_ENDPOINTS.FEE_STATUS}/student/${user.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
