@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 
 const StudentTotalCourses: React.FC = () => {
-  const { user, token } = useAuth();
+  const { token } = useAuth();
   const [totalCourses, setTotalCourses] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 

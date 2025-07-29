@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import GreetingCard from '../components/student/GreetingCard';
 import StudentEnrolledCourses from '../components/student/StudentEnrolledCourses';
 import StudentTodaysClasses from '../components/student/StudentTodaysClasses';
@@ -10,6 +10,7 @@ import GrowthCharts from '../components/common/GrowthCharts';
 import AdvancedSearch from '../components/common/AdvancedSearch';
 import DataExport from '../components/common/DataExport';
 import Tuchat from '../components/common/Tuchat';
+import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 
 interface StudentDashboardProps {

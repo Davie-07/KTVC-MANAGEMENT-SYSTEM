@@ -31,9 +31,11 @@ const ManageStudents: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
-  const [selectedClass, setSelectedClass] = useState('');
-  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<string>('');
+  const [selectedClass, setSelectedClass] = useState<string>('');
+  const [assignToClass, setAssignToClass] = useState<string>('');
   const [removeFromClass, _setRemoveFromClass] = useState<string>('');
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
 
   useEffect(() => {
     fetchStudents();
@@ -88,7 +90,7 @@ const ManageStudents: React.FC = () => {
     }
   };
 
-  const assignToClass = async () => {
+  const handleAssignToClass = async () => {
     if (!selectedClass || selectedStudents.length === 0) {
       setError('Please select a class and at least one student');
       return;
@@ -318,7 +320,7 @@ const ManageStudents: React.FC = () => {
                   Cancel
                 </button>
                 <button 
-                  onClick={assignToClass}
+                  onClick={handleAssignToClass}
                   disabled={!selectedClass}
                   style={{
                     padding: '0.75rem 1.5rem',

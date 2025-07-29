@@ -50,8 +50,8 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
     s.email.toLowerCase().includes(studentSearch.toLowerCase())
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, selectedOptions } = e.target as HTMLInputElement & HTMLSelectElement;
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, selectedOptions } = e.target as HTMLInputElement & HTMLSelectElement;
     if (name === 'students') {
       const values = Array.from(selectedOptions).map(opt => opt.value);
       setForm(prev => ({ ...prev, students: values }));
@@ -125,12 +125,12 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
       {error && <div style={{color:'#ef4444',marginBottom:'0.7rem'}}>{error}</div>}
       <div style={{marginBottom:'1rem'}}>
         <label>Title<br/>
-          <input name="title" value={form.title} onChange={handleChange} required style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}} />
+          <input name="title" value={form.title} onChange={handleFormChange} required style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}} />
         </label>
       </div>
       <div style={{marginBottom:'1rem'}}>
         <label>Course<br/>
-          <input name="course" value={form.course} onChange={handleChange} required style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}} />
+          <input name="course" value={form.course} onChange={handleFormChange} required style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}} />
         </label>
       </div>
       <div style={{marginBottom:'1rem'}}>
@@ -145,7 +145,7 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
           <select
             name="teacher"
             value={form.teacher}
-            onChange={handleChange}
+            onChange={handleFormChange}
             required
             style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}}
             disabled={loadingOptions}
@@ -170,7 +170,7 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
             name="students"
             multiple
             value={form.students}
-            onChange={handleChange}
+            onChange={handleFormChange}
             required
             style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff',minHeight:80}}
             disabled={loadingOptions}
@@ -183,15 +183,15 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
       </div>
       <div style={{marginBottom:'1rem'}}>
         <label>Date<br/>
-          <input name="date" type="date" value={form.date} onChange={handleChange} required style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}} />
+          <input name="date" type="date" value={form.date} onChange={handleFormChange} required style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}} />
         </label>
       </div>
       <div style={{marginBottom:'1rem',display:'flex',gap:'1rem'}}>
         <label style={{flex:1}}>Start Time<br/>
-          <input name="startTime" value={form.startTime} onChange={handleChange} required style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}} />
+          <input name="startTime" value={form.startTime} onChange={handleFormChange} required style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}} />
         </label>
         <label style={{flex:1}}>End Time<br/>
-          <input name="endTime" value={form.endTime} onChange={handleChange} required style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}} />
+          <input name="endTime" value={form.endTime} onChange={handleFormChange} required style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}} />
         </label>
       </div>
       <button type="submit" disabled={loading} style={{background:'#2563eb',color:'#fff',border:'none',borderRadius:6,padding:'0.7rem 1.5rem',fontWeight:600,cursor:'pointer'}}>

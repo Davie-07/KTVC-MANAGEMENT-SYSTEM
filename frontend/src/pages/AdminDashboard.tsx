@@ -1,25 +1,10 @@
-import React, { useState } from 'react';
-import CreateAnnouncementForm from '../components/teacher/CreateAnnouncementForm';
-import CreateExamResultForm from '../components/teacher/CreateExamResultForm';
-import ExamResultsList from '../components/teacher/ExamResultsList';
-import AskDave from '../components/student/AskDave';
-import Settings from '../components/Settings';
-import CourseManagement from '../components/admin/CourseManagement';
-import AdminGreetingCard from '../components/admin/AdminGreetingCard';
-import AdminDashboardStats from '../components/admin/AdminDashboardStats';
+import React from 'react';
+import TeachersManagement from '../components/admin/TeachersManagement';
 import EnhancedStats from '../components/admin/EnhancedStats';
 import AdvancedSearch from '../components/common/AdvancedSearch';
 import DataExport from '../components/common/DataExport';
 import Tuchat from '../components/common/Tuchat';
 import { useAuth } from '../context/AuthContext';
-import AcademicCalendarManagement from '../components/admin/AcademicCalendarManagement';
-import AcademicFeeManagement from '../components/admin/AcademicFeeManagement';
-import UpskillManagement from '../components/admin/UpskillManagement';
-import TeachersManagement from '../components/admin/TeachersManagement';
-import StudentsManagement from '../components/admin/StudentsManagement';
-import CoursesManagement from '../components/admin/CoursesManagement';
-import GrowthCharts from '../components/common/GrowthCharts';
-import Footer from '../components/Footer';
 
 const FeesManagement = () => <div style={{color:'#fff'}}>Fees Management (View/Edit All Students' Fees)</div>;
 const ClassesManagement = () => <div style={{color:'#fff'}}>Classes Management (View/Edit All Classes)</div>;
