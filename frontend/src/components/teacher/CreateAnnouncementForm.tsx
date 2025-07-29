@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 const CreateAnnouncementForm: React.FC = () => {
   const { user, token } = useAuth();
@@ -21,7 +22,7 @@ const CreateAnnouncementForm: React.FC = () => {
     setSuccess(null);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5000/api/announcement', {
+      const res = await fetch(API_ENDPOINTS.ANNOUNCEMENTS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,4 +75,4 @@ const CreateAnnouncementForm: React.FC = () => {
   );
 };
 
-export default CreateAnnouncementForm; 
+export default CreateAnnouncementForm;

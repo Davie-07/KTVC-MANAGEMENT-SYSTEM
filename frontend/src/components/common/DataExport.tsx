@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface DataExportProps {
   userRole: string;
@@ -19,53 +20,45 @@ const DataExport: React.FC<DataExportProps> = ({ userRole, dataType }) => {
       // Determine endpoint based on user role and data type
       switch (dataType) {
         case 'students':
-          if (userRole === 'admin') {
-            endpoint = 'http://localhost:5000/api/auth/students';
-          } else if (userRole === 'teacher') {
-            endpoint = `http://localhost:5000/api/class/teacher/${user?.id}/students`;
+          if (user?.role === 'teacher') {
+            endpoint = `${API_ENDPOINTS.CLASSES}/teacher/${user?.id}/students`;
+          } else {
+            endpoint = API_ENDPOINTS.STUDENTS;
           }
           break;
         case 'teachers':
-          if (userRole === 'admin') {
-            endpoint = 'http://localhost:5000/api/auth/teachers';
-          }
+          endpoint = API_ENDPOINTS.TEACHERS;
           break;
         case 'courses':
-          if (userRole === 'teacher') {
-            endpoint = 'http://localhost:5000/api/course/published';
+          if (user?.role === 'teacher') {
+            endpoint = API_ENDPOINTS.PUBLISHED_COURSES;
           } else {
-            endpoint = 'http://localhost:5000/api/course';
+            endpoint = API_ENDPOINTS.COURSES;
           }
           break;
         case 'classes':
-          if (userRole === 'admin') {
-            endpoint = 'http://localhost:5000/api/class';
-          } else if (userRole === 'teacher') {
-            endpoint = `http://localhost:5000/api/class/teacher/${user?.id}`;
+          if (user?.role === 'teacher') {
+            endpoint = `${API_ENDPOINTS.CLASSES}/teacher/${user?.id}`;
+          } else {
+            endpoint = API_ENDPOINTS.CLASSES;
           }
           break;
         case 'exam-results':
-          if (userRole === 'admin') {
-            endpoint = 'http://localhost:5000/api/exam-result';
-          } else if (userRole === 'teacher') {
-            endpoint = 'http://localhost:5000/api/exam-result';
-          } else if (userRole === 'student') {
-            endpoint = `http://localhost:5000/api/exam-result/student/${user?.id}`;
+          if (user?.role === 'student') {
+            endpoint = `${API_ENDPOINTS.EXAM_RESULTS}/student/${user?.id}`;
+          } else {
+            endpoint = API_ENDPOINTS.EXAM_RESULTS;
           }
           break;
         case 'fee-status':
-          if (userRole === 'admin') {
-            endpoint = 'http://localhost:5000/api/fee-status';
-          } else if (userRole === 'teacher') {
-            endpoint = 'http://localhost:5000/api/fee-status';
-          } else if (userRole === 'student') {
-            endpoint = `http://localhost:5000/api/fee-status/student/${user?.id}`;
+          if (user?.role === 'student') {
+            endpoint = `${API_ENDPOINTS.FEE_STATUS}/student/${user?.id}`;
+          } else {
+            endpoint = API_ENDPOINTS.FEE_STATUS;
           }
           break;
-        case 'personal':
-          if (userRole === 'student') {
-            endpoint = `http://localhost:5000/api/auth/profile/${user?.id}`;
-          }
+        case 'profile':
+          endpoint = `${API_ENDPOINTS.AUTH}/profile/${user?.id}`;
           break;
       }
 

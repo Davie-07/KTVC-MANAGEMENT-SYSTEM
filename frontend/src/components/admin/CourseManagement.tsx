@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Course {
   _id?: string;
@@ -33,7 +34,7 @@ const CourseManagement: React.FC = () => {
       return;
     }
     setLoading(true);
-    fetch('http://localhost:5000/api/course', {
+    fetch(API_ENDPOINTS.COURSES, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => {
@@ -72,7 +73,7 @@ const CourseManagement: React.FC = () => {
     try {
       if (editingId) {
         // Update
-        const res = await fetch(`http://localhost:5000/api/course/${editingId}`, {
+        const res = await fetch(`${API_ENDPOINTS.COURSES}/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify(form),
@@ -83,7 +84,7 @@ const CourseManagement: React.FC = () => {
         setEditingId(null);
       } else {
         // Create
-        const res = await fetch('http://localhost:5000/api/course', {
+        const res = await fetch(API_ENDPOINTS.COURSES, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify(form),
@@ -116,7 +117,7 @@ const CourseManagement: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/course/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(`${API_ENDPOINTS.COURSES}/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (!res.ok) throw new Error('Failed to delete course');
       setCourses(cs => cs.filter(c => c._id !== id));
     } catch (err: any) {
@@ -134,10 +135,9 @@ const CourseManagement: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/course/${id}/publish`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ published: true }),
+      const res = await fetch(`${API_ENDPOINTS.COURSES}/${id}/publish`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to publish course');
       const updated = await res.json();
@@ -157,10 +157,9 @@ const CourseManagement: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/course/${id}/publish`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ published: false }),
+      const res = await fetch(`${API_ENDPOINTS.COURSES}/${id}/publish`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to unpublish course');
       const updated = await res.json();
