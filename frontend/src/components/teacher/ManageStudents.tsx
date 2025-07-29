@@ -31,10 +31,10 @@ const ManageStudents: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
-  const [selectedStudent, setSelectedStudent] = useState<string>('');
+  // const [selectedStudent, setSelectedStudent] = useState<string>('');
   const [selectedClass, setSelectedClass] = useState<string>('');
-  const [assignToClass, setAssignToClass] = useState<string>('');
-  const [removeFromClass, _setRemoveFromClass] = useState<string>('');
+  // const [assignToClass, setAssignToClass] = useState<string>('');
+  // const [removeFromClass, _setRemoveFromClass] = useState<string>('');
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
 
   useEffect(() => {

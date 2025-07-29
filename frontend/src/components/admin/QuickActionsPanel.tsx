@@ -11,7 +11,7 @@ interface Notification {
 }
 
 const QuickActionsPanel: React.FC = () => {
-  const { token } = useAuth();
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showPanel, setShowPanel] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
 interface AcademicCalendar {
   _id: string;
@@ -13,7 +12,6 @@ interface AcademicCalendar {
 }
 
 const AcademicCalendarManagement: React.FC = () => {
-  const { user } = useAuth();
   const [calendars, setCalendars] = useState<AcademicCalendar[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

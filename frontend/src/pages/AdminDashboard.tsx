@@ -4,6 +4,20 @@ import EnhancedStats from '../components/admin/EnhancedStats';
 import AdvancedSearch from '../components/common/AdvancedSearch';
 import DataExport from '../components/common/DataExport';
 import Tuchat from '../components/common/Tuchat';
+import GrowthCharts from '../components/common/GrowthCharts';
+import CreateAnnouncementForm from '../components/teacher/CreateAnnouncementForm';
+import CourseManagement from '../components/admin/CourseManagement';
+import AcademicCalendarManagement from '../components/admin/AcademicCalendarManagement';
+import AcademicFeeManagement from '../components/admin/AcademicFeeManagement';
+import UpskillManagement from '../components/admin/UpskillManagement';
+import UserManagement from '../components/admin/UserManagement';
+import CreateExamResultForm from '../components/teacher/CreateExamResultForm';
+import ExamResultsList from '../components/teacher/ExamResultsList';
+import AskDave from '../components/student/AskDave';
+import Settings from '../components/Settings';
+import Footer from '../components/Footer';
+import AdminGreetingCard from '../components/admin/AdminGreetingCard';
+import AdminDashboardStats from '../components/admin/AdminDashboardStats';
 import { useAuth } from '../context/AuthContext';
 
 const FeesManagement = () => <div style={{color:'#fff'}}>Fees Management (View/Edit All Students' Fees)</div>;
@@ -71,7 +85,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ activeTab, onTabChange 
       mainContent = <UpskillManagement />;
       break;
     case 'users':
-      mainContent = <StudentsManagement />;
+      mainContent = <UserManagement />;
       break;
     case 'fees':
       mainContent = <FeesManagement />;

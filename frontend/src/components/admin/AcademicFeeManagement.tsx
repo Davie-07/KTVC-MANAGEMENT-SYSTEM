@@ -10,7 +10,7 @@ interface AcademicFee {
 }
 
 const AcademicFeeManagement: React.FC = () => {
-  const { user } = useAuth();
+  const { token } = useAuth();
   const [fees, setFees] = useState<AcademicFee[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

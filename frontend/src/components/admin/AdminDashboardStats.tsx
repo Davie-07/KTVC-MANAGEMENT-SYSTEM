@@ -7,8 +7,7 @@ interface AdminDashboardStatsProps {
 }
 
 const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({ onTabChange }) => {
-  const { user } = useAuth();
-  const token = localStorage.getItem('token');
+  const { token } = useAuth();
   const [teacherCount, setTeacherCount] = useState<number | null>(null);
   const [studentCount, setStudentCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);

@@ -22,10 +22,10 @@ const StudentEnrolledCourses: React.FC = () => {
         }
         
         // Get course level from user data (from registration form)
-        const studentLevel = user.level || 'Level 1';
+        const studentLevel = (user as any)?.level || 'Level 1';
         
         // Get course duration from user data (set by teacher)
-        const studentDuration = user.courseDuration || '1 Year';
+        const studentDuration = (user as any)?.courseDuration || '1 Year';
         
         // Fetch course details for name
         const response = await fetch(`http://localhost:5000/api/course/name/${encodeURIComponent(user.course)}`, {

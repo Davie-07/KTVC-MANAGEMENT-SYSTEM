@@ -7,6 +7,8 @@ interface User {
   firstName: string;
   lastName: string;
   course?: string;
+  level?: string;
+  courseDuration?: string;
 }
 
 interface AuthContextType {
