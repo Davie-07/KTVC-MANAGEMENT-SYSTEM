@@ -56,7 +56,7 @@ const Tuchat: React.FC = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ isOnline: true })
+          body: JSON.stringify({ isOnline })
         });
       } catch (err) {
         console.error('Failed to update online status:', err);

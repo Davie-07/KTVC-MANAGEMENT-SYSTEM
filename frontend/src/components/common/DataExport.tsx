@@ -57,7 +57,7 @@ const DataExport: React.FC<DataExportProps> = ({ userRole, dataType }) => {
             endpoint = API_ENDPOINTS.FEE_STATUS;
           }
           break;
-        case 'profile':
+        case 'personal':
           endpoint = `${API_ENDPOINTS.AUTH}/profile/${user?.id}`;
           break;
       }
