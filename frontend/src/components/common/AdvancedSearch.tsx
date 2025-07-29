@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { API_ENDPOINTS } from '../../config/api';
-import './AdvancedSearch.css';
 
 interface SearchResult {
   id: string;
