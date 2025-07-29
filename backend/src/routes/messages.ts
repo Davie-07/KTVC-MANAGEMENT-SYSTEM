@@ -1,19 +1,21 @@
-import { Router, Request } from 'express';
+import * as express from 'express';
 import mongoose from 'mongoose';
+import { authenticate } from '../middleware/auth';
 import Message from '../models/Message';
 import User from '../models/User';
-import { authenticate } from '../middleware/auth';
 
-// Extend the Request interface to include user property
-interface AuthRequest extends Request {
+const router = express.Router();
+
+interface AuthRequest extends express.Request {
   user?: {
     id: string;
     email: string;
     role: string;
   };
+  body?: any;
+  params?: any;
+  headers?: any;
 }
-
-const router = Router();
 
 // Get all users for friends list
 router.get('/users', authenticate, async (req: AuthRequest, res) => {
