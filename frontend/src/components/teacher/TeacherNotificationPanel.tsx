@@ -17,6 +17,7 @@ const TeacherNotificationPanel: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -106,45 +107,68 @@ const TeacherNotificationPanel: React.FC = () => {
 
   return (
     <div className="notification-panel">
-      <div className="notification-header">
-        <h3>🔔 Notifications ({unreadCount} unread)</h3>
+      <button 
+        className="notification-bell"
+        onClick={() => setShowDropdown(!showDropdown)}
+      >
+        🔔
         {unreadCount > 0 && (
-          <button onClick={markAllAsRead} className="mark-all-read">
-            Mark all as read
-          </button>
+          <span className="notification-badge">{unreadCount}</span>
         )}
-      </div>
+      </button>
       
-      <div className="notification-list">
-        {notifications.length === 0 ? (
-          <p>No notifications</p>
-        ) : (
-          notifications.map(notification => (
-            <div 
-              key={notification._id} 
-              className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
-              onClick={() => markAsRead(notification._id)}
-            >
-              <div className="notification-content">
-                <h4>{notification.title}</h4>
-                <p>{notification.message}</p>
-                <small>{new Date(notification.createdAt).toLocaleString()}</small>
-              </div>
-              <div className="notification-actions">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteNotification(notification._id);
-                  }}
-                  className="delete-btn"
+      {showDropdown && (
+        <div className="notification-dropdown">
+          <div className="notification-header">
+            <h3>🔔 Notifications ({unreadCount} unread)</h3>
+            {unreadCount > 0 && (
+              <button onClick={markAllAsRead} className="mark-all-read">
+                Mark all as read
+              </button>
+            )}
+          </div>
+          
+          <div className="notification-list">
+            {notifications.length === 0 ? (
+              <div className="no-notifications">No notifications</div>
+            ) : (
+              notifications.map(notification => (
+                <div 
+                  key={notification._id} 
+                  className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
+                  onClick={() => markAsRead(notification._id)}
                 >
-                  ×
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+                  {!notification.isRead && <div className="unread-indicator"></div>}
+                  <div className="notification-content">
+                    <h4>{notification.title}</h4>
+                    <p>{notification.message}</p>
+                    <small>{new Date(notification.createdAt).toLocaleString()}</small>
+                  </div>
+                  <div className="notification-actions">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNotification(notification._id);
+                      }}
+                      className="delete-btn"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#ef4444',
+                        cursor: 'pointer',
+                        fontSize: '1.2rem',
+                        padding: '0.2rem'
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

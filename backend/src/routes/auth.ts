@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../models/User';
+import Notification from '../models/Notification';
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/sendEmail';
 import { authenticate, requireAdmin, AuthRequest } from '../middleware/auth';
@@ -69,6 +70,23 @@ router.post('/register', async (req, res) => {
         Warm regards,<br>
         David Daniel's Development & Testing Team`
       );
+      
+      // Create notifications for teachers of the same course
+      try {
+        const teachers = await User.find({ role: 'teacher', course: course });
+        for (const teacher of teachers) {
+          await Notification.create({
+            recipient: teacher._id,
+            type: 'new_student',
+            message: `New student ${firstName} ${lastName} has enrolled in your ${course} course.`,
+            relatedId: user._id
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to create teacher notifications:', notificationError);
+        // Don't fail registration if notifications fail
+      }
+      
       res.status(201).json({ message: 'Registration successful. Please check your email for the verification code.' });
     } catch (emailError) {
       // Email failed but registration succeeded

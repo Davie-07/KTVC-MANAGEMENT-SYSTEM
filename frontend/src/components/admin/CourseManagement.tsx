@@ -136,8 +136,12 @@ const CourseManagement: React.FC = () => {
     setError(null);
     try {
       const res = await fetch(`${API_ENDPOINTS.COURSES}/${id}/publish`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ published: true })
       });
       if (!res.ok) throw new Error('Failed to publish course');
       const updated = await res.json();
@@ -158,8 +162,12 @@ const CourseManagement: React.FC = () => {
     setError(null);
     try {
       const res = await fetch(`${API_ENDPOINTS.COURSES}/${id}/publish`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ published: false })
       });
       if (!res.ok) throw new Error('Failed to unpublish course');
       const updated = await res.json();

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Class from '../models/Class';
 import User from '../models/User';
+import Notification from '../models/Notification';
 
 const router = Router();
 
@@ -19,6 +20,22 @@ router.post('/publish', async (req, res) => {
       endTime,
       published: true,
     });
+
+    // Create notifications for all assigned students
+    try {
+      for (const studentId of students) {
+        await Notification.create({
+          recipient: studentId,
+          type: 'class_assigned',
+          message: `You have been assigned to class: ${title} on ${date} at ${startTime}`,
+          relatedId: newClass._id
+        });
+      }
+    } catch (notificationError) {
+      console.error('Failed to create student notifications:', notificationError);
+      // Don't fail class creation if notifications fail
+    }
+
     res.status(201).json(newClass);
   } catch (err) {
     res.status(500).json({ message: 'Failed to publish class.', error: err });
