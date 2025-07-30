@@ -1,0 +1,113 @@
+/* Responsive styles for TeachersManagement */
+
+@media (max-width: 768px) {
+  .teachers-container {
+    padding: 1rem !important;
+  }
+  
+  .teachers-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+  }
+  
+  .teachers-title {
+    font-size: 1.5rem !important;
+  }
+  
+  .enroll-button {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .form-container {
+    padding: 1rem !important;
+  }
+  
+  .form-title {
+    font-size: 1.25rem !important;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .form-label {
+    font-size: 0.875rem !important;
+  }
+  
+  .form-input {
+    padding: 0.4rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .form-buttons {
+    flex-direction: column !important;
+  }
+  
+  .form-button {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .table-container {
+    padding: 1rem !important;
+  }
+  
+  .table-title {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Show mobile view, hide desktop view */
+  .mobile-view {
+    display: block !important;
+  }
+  
+  .desktop-view {
+    display: none !important;
+  }
+  
+  .mobile-card {
+    background: #23232b;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #374151;
+  }
+  
+  .mobile-card-title {
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-card-info {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    margin-bottom: 0.25rem;
+  }
+  
+  .mobile-card-status {
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-card-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .mobile-action-button {
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 769px) {
+  .mobile-view {
+    display: none !important;
+  }
+  
+  .desktop-view {
+    display: block !important;
+  }
+} 

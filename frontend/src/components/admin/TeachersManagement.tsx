@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { API_ENDPOINTS } from '../../config/api';
+import './TeachersManagement.css';
 
 interface Teacher {
   _id: string;
@@ -182,11 +183,12 @@ const TeachersManagement: React.FC = () => {
   };
 
   return (
-    <div style={{padding:'2rem',background:'#0f0f23',minHeight:'100vh',color:'#fff'}}>
+    <div className="teachers-container" style={{padding:'2rem',background:'#0f0f23',minHeight:'100vh',color:'#fff'}}>
       <div style={{maxWidth:'1200px',margin:'0 auto'}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'2rem'}}>
-          <h1 style={{margin:0,color:'#fff'}}>Teachers Management</h1>
+        <div className="teachers-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'2rem'}}>
+          <h1 className="teachers-title" style={{margin:0,color:'#fff'}}>Teachers Management</h1>
           <button 
+            className="enroll-button"
             onClick={() => setShowForm(!showForm)}
             style={{
               padding:'0.75rem 1.5rem',
@@ -216,74 +218,79 @@ const TeachersManagement: React.FC = () => {
         )}
 
         {showForm && (
-          <div style={{background:'#1a1a2e',padding:'2rem',borderRadius:'12px',marginBottom:'2rem',border:'1px solid #374151'}}>
-            <h2 style={{marginTop:0,marginBottom:'1.5rem',color:'#fff'}}>
+          <div className="form-container" style={{background:'#1a1a2e',padding:'2rem',borderRadius:'12px',marginBottom:'2rem',border:'1px solid #374151'}}>
+            <h2 className="form-title" style={{marginTop:0,marginBottom:'1.5rem',color:'#fff'}}>
               {editingTeacher ? 'Edit Teacher' : 'Enroll New Teacher'}
             </h2>
             
             <form onSubmit={editingTeacher ? handleUpdate : handleSubmit}>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+              <div className="form-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
                 <div>
-                  <label>First Name<br/>
+                  <label className="form-label">First Name<br/>
                     <input 
                       name="firstName" 
                       type="text" 
                       value={form.firstName} 
                       onChange={handleChange} 
                       required 
+                      className="form-input"
                       style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}}
                     />
                   </label>
                 </div>
                 <div>
-                  <label>Last Name<br/>
+                  <label className="form-label">Last Name<br/>
                     <input 
                       name="lastName" 
                       type="text" 
                       value={form.lastName} 
                       onChange={handleChange} 
                       required 
+                      className="form-input"
                       style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}}
                     />
                   </label>
                 </div>
               </div>
 
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+              <div className="form-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
                 <div>
-                  <label>Email<br/>
+                  <label className="form-label">Email<br/>
                     <input 
                       name="email" 
                       type="email" 
                       value={form.email} 
                       onChange={handleChange} 
                       required 
+                      className="form-input"
                       style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}}
                     />
                   </label>
                 </div>
                 <div>
-                  <label>Phone Number<br/>
+                  <label className="form-label">Phone Number<br/>
                     <input 
                       name="phone" 
                       type="tel" 
                       value={form.phone} 
                       onChange={handleChange} 
                       required 
+                      className="form-input"
                       style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}}
                     />
                   </label>
                 </div>
               </div>
 
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+              <div className="form-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
                 <div>
-                  <label>Course<br/>
+                  <label className="form-label">Course<br/>
                     <select 
                       name="course" 
                       value={form.course} 
                       onChange={handleChange} 
                       required 
+                      className="form-input"
                       style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}}
                     >
                       <option value="">Select Course</option>
@@ -295,13 +302,14 @@ const TeachersManagement: React.FC = () => {
                 </div>
                 {!editingTeacher && (
                   <div>
-                    <label>Password<br/>
+                    <label className="form-label">Password<br/>
                       <input 
                         name="password" 
                         type="password" 
                         value={form.password} 
                         onChange={handleChange} 
                         required 
+                        className="form-input"
                         style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff'}}
                       />
                     </label>
@@ -309,11 +317,12 @@ const TeachersManagement: React.FC = () => {
                 )}
               </div>
 
-              <div style={{display:'flex',gap:'1rem',justifyContent:'flex-end'}}>
+              <div className="form-buttons" style={{display:'flex',gap:'1rem',justifyContent:'flex-end'}}>
                 {editingTeacher && (
                   <button 
                     type="button" 
                     onClick={cancelEdit}
+                    className="form-button"
                     style={{
                       padding:'0.75rem 1.5rem',
                       background:'#6b7280',
@@ -329,6 +338,7 @@ const TeachersManagement: React.FC = () => {
                 )}
                 <button 
                   type="submit"
+                  className="form-button"
                   style={{
                     padding:'0.75rem 1.5rem',
                     background:'#2563eb',
@@ -348,8 +358,8 @@ const TeachersManagement: React.FC = () => {
         )}
 
         <div style={{background:'#1a1a2e',borderRadius:'12px',overflow:'hidden',border:'1px solid #374151'}}>
-          <div style={{padding:'1.5rem',borderBottom:'1px solid #374151'}}>
-            <h2 style={{margin:0,color:'#fff'}}>All Teachers ({teachers.length})</h2>
+          <div className="table-container" style={{padding:'1.5rem',borderBottom:'1px solid #374151'}}>
+            <h2 className="table-title" style={{margin:0,color:'#fff'}}>All Teachers ({teachers.length})</h2>
           </div>
           
           {loading ? (
@@ -358,73 +368,136 @@ const TeachersManagement: React.FC = () => {
             <div style={{padding:'2rem',textAlign:'center',color:'#9ca3af'}}>No teachers found</div>
           ) : (
             <div style={{overflowX:'auto'}}>
-              <table style={{width:'100%',borderCollapse:'collapse'}}>
-                <thead>
-                  <tr style={{background:'#374151'}}>
-                    <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Name</th>
-                    <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Email</th>
-                    <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Phone</th>
-                    <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Course</th>
-                    <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Teacher ID</th>
-                    <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Status</th>
-                    <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
+              {/* Mobile Card View */}
+              <div className="mobile-view" style={{display: 'none'}}>
+                <div style={{padding:'1rem'}}>
                   {teachers.map((teacher) => (
-                    <tr key={teacher._id} style={{borderBottom:'1px solid #374151'}}>
-                      <td style={{padding:'1rem'}}>{teacher.firstName} {teacher.lastName}</td>
-                      <td style={{padding:'1rem'}}>{teacher.email}</td>
-                      <td style={{padding:'1rem'}}>{teacher.phone || 'N/A'}</td>
-                      <td style={{padding:'1rem'}}>{teacher.course}</td>
-                      <td style={{padding:'1rem'}}>{teacher.teacherId}</td>
-                      <td style={{padding:'1rem'}}>
+                    <div key={teacher._id} className="mobile-card">
+                      <div className="mobile-card-title">
+                        <strong>{teacher.firstName} {teacher.lastName}</strong>
+                      </div>
+                      <div className="mobile-card-info">📧 {teacher.email}</div>
+                      <div className="mobile-card-info">📞 {teacher.phone || 'N/A'}</div>
+                      <div className="mobile-card-info">📚 {teacher.course}</div>
+                      <div className="mobile-card-info">🆔 {teacher.teacherId}</div>
+                      <div className="mobile-card-status">
                         <span style={{
                           padding:'0.25rem 0.5rem',
                           borderRadius:'4px',
-                          fontSize:'0.875rem',
+                          fontSize:'0.75rem',
                           background: teacher.isVerified ? '#059669' : '#dc2626',
                           color:'#fff'
                         }}>
                           {teacher.isVerified ? 'Verified' : 'Pending'}
                         </span>
-                      </td>
-                      <td style={{padding:'1rem'}}>
-                        <div style={{display:'flex',gap:'0.5rem'}}>
-                          <button 
-                            onClick={() => handleEdit(teacher)}
-                            style={{
-                              padding:'0.5rem',
-                              background:'#2563eb',
-                              color:'#fff',
-                              border:'none',
-                              borderRadius:'4px',
-                              cursor:'pointer',
-                              fontSize:'0.875rem'
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(teacher._id, `${teacher.firstName} ${teacher.lastName}`)}
-                            style={{
-                              padding:'0.5rem',
-                              background:'#dc2626',
-                              color:'#fff',
-                              border:'none',
-                              borderRadius:'4px',
-                              cursor:'pointer',
-                              fontSize:'0.875rem'
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                      </div>
+                      <div className="mobile-card-actions">
+                        <button 
+                          onClick={() => handleEdit(teacher)}
+                          className="mobile-action-button"
+                          style={{
+                            padding:'0.4rem 0.8rem',
+                            background:'#2563eb',
+                            color:'#fff',
+                            border:'none',
+                            borderRadius:'4px',
+                            cursor:'pointer',
+                            fontSize:'0.75rem'
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(teacher._id, `${teacher.firstName} ${teacher.lastName}`)}
+                          className="mobile-action-button"
+                          style={{
+                            padding:'0.4rem 0.8rem',
+                            background:'#dc2626',
+                            color:'#fff',
+                            border:'none',
+                            borderRadius:'4px',
+                            cursor:'pointer',
+                            fontSize:'0.75rem'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </div>
+              
+              {/* Desktop Table View */}
+              <div className="desktop-view">
+                <table style={{width:'100%',borderCollapse:'collapse'}}>
+                  <thead>
+                    <tr style={{background:'#374151'}}>
+                      <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Name</th>
+                      <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Email</th>
+                      <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Phone</th>
+                      <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Course</th>
+                      <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Teacher ID</th>
+                      <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Status</th>
+                      <th style={{padding:'1rem',textAlign:'left',borderBottom:'1px solid #4b5563'}}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {teachers.map((teacher) => (
+                      <tr key={teacher._id} style={{borderBottom:'1px solid #374151'}}>
+                        <td style={{padding:'1rem'}}>{teacher.firstName} {teacher.lastName}</td>
+                        <td style={{padding:'1rem'}}>{teacher.email}</td>
+                        <td style={{padding:'1rem'}}>{teacher.phone || 'N/A'}</td>
+                        <td style={{padding:'1rem'}}>{teacher.course}</td>
+                        <td style={{padding:'1rem'}}>{teacher.teacherId}</td>
+                        <td style={{padding:'1rem'}}>
+                          <span style={{
+                            padding:'0.25rem 0.5rem',
+                            borderRadius:'4px',
+                            fontSize:'0.875rem',
+                            background: teacher.isVerified ? '#059669' : '#dc2626',
+                            color:'#fff'
+                          }}>
+                            {teacher.isVerified ? 'Verified' : 'Pending'}
+                          </span>
+                        </td>
+                        <td style={{padding:'1rem'}}>
+                          <div style={{display:'flex',gap:'0.5rem'}}>
+                            <button 
+                              onClick={() => handleEdit(teacher)}
+                              style={{
+                                padding:'0.5rem',
+                                background:'#2563eb',
+                                color:'#fff',
+                                border:'none',
+                                borderRadius:'4px',
+                                cursor:'pointer',
+                                fontSize:'0.875rem'
+                              }}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(teacher._id, `${teacher.firstName} ${teacher.lastName}`)}
+                              style={{
+                                padding:'0.5rem',
+                                background:'#dc2626',
+                                color:'#fff',
+                                border:'none',
+                                borderRadius:'4px',
+                                cursor:'pointer',
+                                fontSize:'0.875rem'
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
