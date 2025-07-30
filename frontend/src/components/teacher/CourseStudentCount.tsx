@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 import StatisticsCard from '../admin/StatisticsCard';
 
 interface CourseStudentCountProps {
@@ -21,7 +22,7 @@ const CourseStudentCount: React.FC<CourseStudentCountProps> = ({ onTabChange }) 
           return;
         }
         
-        const response = await fetch(`http://localhost:5000/api/auth/students/course/${encodeURIComponent(user.course)}`, {
+        const response = await fetch(`${API_ENDPOINTS.STUDENTS_BY_COURSE}/${encodeURIComponent(user.course)}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         

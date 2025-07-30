@@ -2,14 +2,16 @@ import { Router } from 'express';
 import ExamResult from '../models/ExamResult';
 import User from '../models/User';
 import ExamResultHistory from '../models/ExamResultHistory';
-import { authenticate } from '../middleware/auth';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
 // Create an exam result
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req: AuthRequest, res) => {
   try {
-    const { student, unit, cam1, cam2, cam3, average, changedBy } = req.body;
+    const { student, unit, cam1, cam2, cam3, average } = req.body;
+    const changedBy = req.user?._id; // Get the authenticated user's ID
+    
     const result = await ExamResult.create({ student, unit, cam1, cam2, cam3, average });
     await ExamResultHistory.create({ student, unit, cam1, cam2, cam3, average, changedBy, changedAt: new Date() });
     res.status(201).json(result);
@@ -41,10 +43,11 @@ router.get('/student/:studentId', authenticate, async (req, res) => {
 });
 
 // Update an exam result
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const { unit, cam1, cam2, cam3, average, changedBy } = req.body;
+    const { unit, cam1, cam2, cam3, average } = req.body;
+    const changedBy = req.user?._id; // Get the authenticated user's ID
     const updated = await ExamResult.findByIdAndUpdate(id, { unit, cam1, cam2, cam3, average }, { new: true });
     if (updated) {
       await ExamResultHistory.create({ student: updated.student, unit, cam1, cam2, cam3, average, changedBy, changedAt: new Date() });

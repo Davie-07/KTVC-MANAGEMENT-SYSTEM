@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface StudentFee {
   _id: string;
@@ -45,9 +46,13 @@ const StudentFeeManagement: React.FC = () => {
   const fetchFees = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/student-fee', {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Token not found');
+      }
+      const response = await fetch(API_ENDPOINTS.STUDENT_FEE, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       if (response.ok) {
@@ -67,16 +72,17 @@ const StudentFeeManagement: React.FC = () => {
     setSuccess(null);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/student-fee/${paymentForm.feeId}/payment`, {
-        method: 'PUT',
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Token not found');
+      }
+      const response = await fetch(`${API_ENDPOINTS.STUDENT_FEE}/${paymentForm.feeId}/payment`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          paidAmount: paymentForm.paidAmount,
-          paidBy: paymentForm.paidBy,
-        })
+        body: JSON.stringify(paymentForm)
       });
 
       if (response.ok) {

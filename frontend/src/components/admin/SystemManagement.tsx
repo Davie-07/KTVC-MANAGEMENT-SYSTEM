@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface SystemStatus {
   database: 'online' | 'offline' | 'warning';
@@ -32,14 +33,14 @@ const SystemManagement: React.FC = () => {
   const fetchSystemData = async () => {
     try {
       // Fetch system status
-      const statusResponse = await fetch('http://localhost:5000/api/system/status', {
+      const statusResponse = await fetch(API_ENDPOINTS.SYSTEM_STATUS, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const statusData = await statusResponse.json();
       setSystemStatus(statusData);
 
       // Fetch system settings
-      const settingsResponse = await fetch('http://localhost:5000/api/system/settings', {
+      const settingsResponse = await fetch(API_ENDPOINTS.SYSTEM_SETTINGS, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const settingsData = await settingsResponse.json();
@@ -72,7 +73,7 @@ const SystemManagement: React.FC = () => {
     
     setSaving(true);
     try {
-      await fetch('http://localhost:5000/api/system/settings', {
+      await fetch(API_ENDPOINTS.SYSTEM_SETTINGS, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +92,7 @@ const SystemManagement: React.FC = () => {
 
   const triggerBackup = async () => {
     try {
-      await fetch('http://localhost:5000/api/system/backup', {
+      await fetch(API_ENDPOINTS.SYSTEM_BACKUP, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
