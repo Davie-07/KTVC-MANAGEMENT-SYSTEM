@@ -120,7 +120,7 @@ const CreateExamResultForm: React.FC = () => {
 
       const average = calculateAverage();
       const examData = {
-        studentId: selectedStudent,
+        student: selectedStudent,
         unit: form.unit,
         cam1: form.cam1,
         cam2: form.cam2,

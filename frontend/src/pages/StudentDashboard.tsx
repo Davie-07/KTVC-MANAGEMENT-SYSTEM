@@ -1,7 +1,7 @@
 import React from 'react';
 import GreetingCard from '../components/student/GreetingCard';
 import StudentEnrolledCourses from '../components/student/StudentEnrolledCourses';
-import StudentTodaysClasses from '../components/student/StudentTodaysClasses';
+import StudentUpcomingClasses from '../components/student/StudentTodaysClasses';
 import StudentTotalCourses from '../components/student/StudentTotalCourses';
 import AdvancedSearch from '../components/common/AdvancedSearch';
 import DataExport from '../components/common/DataExport';
@@ -34,7 +34,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ activeTab }) => {
           
           <div className="card-row-3">
             <StudentEnrolledCourses />
-            <StudentTodaysClasses />
+            <StudentUpcomingClasses />
             <StudentTotalCourses />
           </div>
           

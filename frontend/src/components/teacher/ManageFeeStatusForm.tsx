@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Student {
   _id: string;
@@ -26,7 +27,7 @@ const ManageFeeStatusForm: React.FC = () => {
 
   useEffect(() => {
     setLoadingStudents(true);
-    fetch('http://localhost:5000/api/exam-result/students', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(API_ENDPOINTS.EXAM_RESULTS_STUDENTS, { headers: { Authorization: `Bearer ${token}` } })
       .then(res => res.json())
       .then(data => setStudents(Array.isArray(data) ? data : []))
       .catch(() => setStudents([]))
@@ -39,7 +40,7 @@ const ManageFeeStatusForm: React.FC = () => {
       return;
     }
     setLoadingHistory(true);
-    fetch(`http://localhost:5000/api/fee-status/history/${selectedStudent}`)
+    fetch(`${API_ENDPOINTS.FEE_STATUS_HISTORY}/${selectedStudent}`)
       .then(res => res.json())
       .then(data => setHistory(Array.isArray(data) ? data : []))
       .catch(() => setHistory([]))
@@ -58,7 +59,7 @@ const ManageFeeStatusForm: React.FC = () => {
     setSuccess(null);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5000/api/fee-status', {
+      const res = await fetch(API_ENDPOINTS.FEE_STATUS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
