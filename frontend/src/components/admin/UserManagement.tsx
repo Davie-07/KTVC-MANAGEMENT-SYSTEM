@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface User {
   _id: string;
@@ -17,49 +18,48 @@ interface User {
 const UserManagement: React.FC = () => {
   const { token } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(true);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [filterRole, setFilterRole] = useState<'all' | 'student' | 'teacher'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [bulkAction, setBulkAction] = useState<'activate' | 'deactivate' | 'delete'>('activate');
-  const [processing, setProcessing] = useState(false);
+  const [processing] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (!token) return;
 
-  const fetchUsers = async () => {
-    try {
-      const [studentsResponse, teachersResponse] = await Promise.all([
-        fetch('http://localhost:5000/api/auth/students', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch('http://localhost:5000/api/auth/teachers', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-      ]);
+    Promise.all([
+      fetch(API_ENDPOINTS.STUDENTS, { headers: { Authorization: `Bearer ${token}` } }),
+      fetch(API_ENDPOINTS.TEACHERS, { headers: { Authorization: `Bearer ${token}` } })
+    ])
+      .then(responses => Promise.all(responses.map(res => res.json())))
+      .then(([studentsData, teachersData]) => {
+        setUsers([
+          ...(Array.isArray(studentsData) ? studentsData.map((s: any) => ({ ...s, role: 'student', isActive: true })) : []),
+          ...(Array.isArray(teachersData) ? teachersData.map((t: any) => ({ ...t, role: 'teacher', isActive: true })) : [])
+        ]);
+      })
+      .catch(err => console.error('Error fetching users:', err));
+  }, [token]);
 
-      const students = await studentsResponse.json();
-      const teachers = await teachersResponse.json();
-
-      const allUsers = [
-        ...(Array.isArray(students) ? students.map((s: any) => ({ ...s, role: 'student', isActive: true })) : []),
-        ...(Array.isArray(teachers) ? teachers.map((t: any) => ({ ...t, role: 'teacher', isActive: true })) : [])
-      ];
-
-      setUsers(allUsers);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    } finally {
-      setLoading(false);
+  // Auto-dismiss success/error after 4 seconds
+  useEffect(() => {
+    if (success || error) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+        setError(null);
+      }, 4000);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [success, error]);
 
   const filteredUsers = users.filter(user => {
     const matchesRole = filterRole === 'all' || user.role === filterRole;
     const matchesSearch = user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesRole && matchesSearch;
   });
 
@@ -79,42 +79,36 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const executeBulkAction = async () => {
-    if (selectedUsers.length === 0) {
-      alert('Please select users to perform bulk action');
-      return;
-    }
-
-    if (bulkAction === 'delete' && !confirm(`Are you sure you want to delete ${selectedUsers.length} user(s)?`)) {
-      return;
-    }
-
-    setProcessing(true);
+  const handleBulkAction = async (action: string, userIds: string[]) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/bulk-action', {
+      const response = await fetch(API_ENDPOINTS.AUTH_BULK_ACTION, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          userIds: selectedUsers,
-          action: bulkAction
-        })
+        body: JSON.stringify({ action, userIds })
       });
 
       if (response.ok) {
-        alert(`Bulk action '${bulkAction}' completed successfully`);
-        setSelectedUsers([]);
-        fetchUsers(); // Refresh the list
+        setSuccess(`Bulk action '${action}' completed successfully!`);
+        Promise.all([
+          fetch(API_ENDPOINTS.STUDENTS, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(API_ENDPOINTS.TEACHERS, { headers: { Authorization: `Bearer ${token}` } })
+        ])
+          .then(responses => Promise.all(responses.map(res => res.json())))
+          .then(([studentsData, teachersData]) => {
+            setUsers([
+              ...(Array.isArray(studentsData) ? studentsData.map((s: any) => ({ ...s, role: 'student', isActive: true })) : []),
+              ...(Array.isArray(teachersData) ? teachersData.map((t: any) => ({ ...t, role: 'teacher', isActive: true })) : [])
+            ]);
+          });
       } else {
-        throw new Error('Bulk action failed');
+        setError('Failed to perform bulk action');
       }
     } catch (error) {
-      console.error('Error executing bulk action:', error);
-      alert('Failed to execute bulk action');
-    } finally {
-      setProcessing(false);
+      setError('Error performing bulk action');
+      console.error('Error:', error);
     }
   };
 
@@ -129,6 +123,18 @@ const UserManagement: React.FC = () => {
   return (
     <div style={{ color: '#fff' }}>
       <h2 style={{ marginBottom: '2rem', fontSize: '1.8rem' }}>👥 User Management</h2>
+
+      {/* Success/Error Messages */}
+      {success && (
+        <div style={{ background: '#064e3b', color: '#10b981', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem' }}>
+          ✅ {success}
+        </div>
+      )}
+      {error && (
+        <div style={{ background: '#7f1d1d', color: '#ef4444', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem' }}>
+          ❌ {error}
+        </div>
+      )}
 
       {/* Filters and Search */}
       <div style={{
@@ -197,7 +203,7 @@ const UserManagement: React.FC = () => {
           </select>
 
           <button
-            onClick={executeBulkAction}
+            onClick={() => handleBulkAction(bulkAction, selectedUsers)}
             disabled={selectedUsers.length === 0 || processing}
             style={{
               background: selectedUsers.length === 0 || processing ? '#6b7280' : '#3b82f6',
@@ -303,4 +309,4 @@ const UserManagement: React.FC = () => {
   );
 };
 
-export default UserManagement; 
+export default UserManagement;

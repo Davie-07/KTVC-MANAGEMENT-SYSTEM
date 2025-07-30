@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Teacher {
   _id: string;
@@ -38,10 +38,13 @@ const TeachersManagement: React.FC = () => {
 
   const fetchPublishedCourses = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/course/published', {
+      const response = await fetch(API_ENDPOINTS.PUBLISHED_COURSES, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setCourses(response.data);
+      if (response.ok) {
+        const data = await response.json();
+        setCourses(data);
+      }
     } catch (err) {
       console.error('Error fetching courses:', err);
     }
@@ -50,11 +53,16 @@ const TeachersManagement: React.FC = () => {
   const fetchTeachers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/auth/teachers', {
+      const response = await fetch(API_ENDPOINTS.TEACHERS, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setTeachers(response.data);
-      setError('');
+      if (response.ok) {
+        const data = await response.json();
+        setTeachers(data);
+        setError('');
+      } else {
+        setError('Failed to fetch teachers');
+      }
     } catch (err) {
       setError('Failed to fetch teachers');
       console.error('Error fetching teachers:', err);
@@ -73,18 +81,26 @@ const TeachersManagement: React.FC = () => {
       setError('');
       setSuccess('');
       
-      const response = await axios.post('http://localhost:5000/api/auth/teacher', form, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(API_ENDPOINTS.AUTH_TEACHER, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(form)
       });
       
-      if (response.status === 201) {
+      if (response.ok) {
         setSuccess(`Teacher ${form.firstName} ${form.lastName} enrolled successfully!`);
         setForm({ firstName: '', lastName: '', email: '', course: '', password: '', phone: '' });
         setShowForm(false);
         fetchTeachers(); // Refresh the list
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to enroll teacher');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to enroll teacher');
+      setError('Failed to enroll teacher');
       console.error('Error enrolling teacher:', err);
     }
   };
@@ -105,55 +121,56 @@ const TeachersManagement: React.FC = () => {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTeacher) return;
-
+    
     try {
       setError('');
       setSuccess('');
       
-      const updateData = {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        course: form.course,
-        phone: form.phone
-      };
-
-      const response = await axios.put(`http://localhost:5000/api/auth/teacher/${editingTeacher._id}`, updateData, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(`${API_ENDPOINTS.AUTH_TEACHER_UPDATE}/${editingTeacher._id}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(form)
       });
       
-      if (response.status === 200) {
+      if (response.ok) {
         setSuccess(`Teacher ${form.firstName} ${form.lastName} updated successfully!`);
-        setForm({ firstName: '', lastName: '', email: '', course: '', password: '', phone: '' });
         setEditingTeacher(null);
-        setShowForm(false);
+        setForm({ firstName: '', lastName: '', email: '', course: '', password: '', phone: '' });
         fetchTeachers(); // Refresh the list
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to update teacher');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update teacher');
+      setError('Failed to update teacher');
       console.error('Error updating teacher:', err);
     }
   };
 
   const handleDelete = async (teacherId: string, teacherName: string) => {
-    if (!window.confirm(`Are you sure you want to delete ${teacherName}? This action cannot be undone.`)) {
-      return;
-    }
-
+    if (!window.confirm(`Are you sure you want to delete ${teacherName}?`)) return;
+    
     try {
       setError('');
       setSuccess('');
       
-      const response = await axios.delete(`http://localhost:5000/api/auth/teacher/${teacherId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(`${API_ENDPOINTS.AUTH_TEACHER_DELETE}/${teacherId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      if (response.status === 200) {
+      if (response.ok) {
         setSuccess(`Teacher ${teacherName} deleted successfully!`);
         fetchTeachers(); // Refresh the list
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to delete teacher');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to delete teacher');
+      setError('Failed to delete teacher');
       console.error('Error deleting teacher:', err);
     }
   };

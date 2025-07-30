@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
+
+interface Student {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
 
 interface ExamResult {
   _id: string;
-  student: { _id: string; firstName: string; lastName: string; email: string } | string;
+  student: Student | string;
   unit: string;
   cam1: { score: number; outOf: number };
   cam2: { score: number; outOf: number };
@@ -16,13 +24,19 @@ const ExamResultsList: React.FC = () => {
   const [results, setResults] = useState<ExamResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{ unit: string; cam1: string; cam2: string; cam3: string; average: string }>({ unit: '', cam1: '', cam2: '', cam3: '', average: '' });
+  const [editForm, setEditForm] = useState({
+    unit: '',
+    cam1: '',
+    cam2: '',
+    cam3: '',
+    average: ''
+  });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const fetchResults = () => {
     setLoading(true);
-    fetch('http://localhost:5000/api/exam-result', {
+    fetch(API_ENDPOINTS.EXAM_RESULTS, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -32,18 +46,17 @@ const ExamResultsList: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchResults();
-    // eslint-disable-next-line
+    if (token) fetchResults();
   }, [token]);
 
   const startEdit = (r: ExamResult) => {
     setEditId(r._id);
-    setEditForm({ 
-      unit: r.unit, 
-      cam1: r.cam1?.score?.toString() || '0', 
-      cam2: r.cam2?.score?.toString() || '0', 
-      cam3: r.cam3?.score?.toString() || '0', 
-      average: r.average?.toString() || '0' 
+    setEditForm({
+      unit: r.unit,
+      cam1: r.cam1?.score.toString() || '0',
+      cam2: r.cam2?.score.toString() || '0',
+      cam3: r.cam3?.score.toString() || '0',
+      average: r.average?.toString() || '0'
     });
   };
 
@@ -51,13 +64,9 @@ const ExamResultsList: React.FC = () => {
     const { name, value } = e.target;
     setEditForm(prev => {
       const updated = { ...prev, [name]: value };
-      if (name === 'cam1' || name === 'cam2' || name === 'cam3') {
-        const cam1 = parseFloat(name === 'cam1' ? value : prev.cam1);
-        const cam2 = parseFloat(name === 'cam2' ? value : prev.cam2);
-        const cam3 = parseFloat(name === 'cam3' ? value : prev.cam3);
-        if (!isNaN(cam1) && !isNaN(cam2) && !isNaN(cam3)) {
-          updated.average = ((cam1 + cam2 + cam3) / 3).toFixed(2);
-        }
+      const camScores = ['cam1', 'cam2', 'cam3'].map(k => parseFloat(updated[k as keyof typeof updated]));
+      if (camScores.every(score => !isNaN(score))) {
+        updated.average = (camScores.reduce((a, b) => a + b, 0) / 3).toFixed(2);
       }
       return updated;
     });
@@ -66,20 +75,26 @@ const ExamResultsList: React.FC = () => {
   const saveEdit = async () => {
     if (!editId) return;
     setSaving(true);
-    await fetch(`http://localhost:5000/api/exam-result/${editId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        unit: editForm.unit,
-        cam1: { score: parseFloat(editForm.cam1), outOf: 100 },
-        cam2: { score: parseFloat(editForm.cam2), outOf: 100 },
-        cam3: { score: parseFloat(editForm.cam3), outOf: 100 },
-        average: parseFloat(editForm.average)
-      })
-    });
-    setEditId(null);
-    setSaving(false);
-    fetchResults();
+    try {
+      const response = await fetch(`${API_ENDPOINTS.EXAM_RESULTS}/${editId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(editForm)
+      });
+      if (response.ok) {
+        const updated = await response.json();
+        setResults(prev => prev.map(r => r._id === editId ? updated : r));
+        setEditId(null);
+        setEditForm({ unit: '', cam1: '', cam2: '', cam3: '', average: '' });
+      }
+    } catch (error) {
+      console.error('Error saving edit:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const cancelEdit = () => {
@@ -87,66 +102,73 @@ const ExamResultsList: React.FC = () => {
   };
 
   const deleteResult = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this result?')) return;
+    if (!window.confirm('Are you sure you want to delete this exam result?')) return;
     setDeleting(id);
-    await fetch(`http://localhost:5000/api/exam-result/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setDeleting(null);
-    fetchResults();
+    try {
+      const response = await fetch(`${API_ENDPOINTS.EXAM_RESULTS}/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        setResults(prev => prev.filter(r => r._id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting result:', error);
+    } finally {
+      setDeleting(null);
+    }
   };
 
   return (
-    <div style={{background:'#23232b',color:'#fff',borderRadius:12,padding:'1.5rem',marginBottom:'1.5rem',boxShadow:'0 2px 12px #0002',maxWidth:800}}>
+    <div style={{ background: '#23232b', color: '#fff', borderRadius: 12, padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 2px 12px #0002', maxWidth: 800 }}>
       <h3>All Exam Results</h3>
       {loading ? (
         <p>Loading results...</p>
       ) : results.length === 0 ? (
         <p>No results found.</p>
       ) : (
-        <table style={{width:'100%',color:'#fff',borderCollapse:'collapse'}}>
+        <table style={{ width: '100%', color: '#fff', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{background:'#18181b'}}>
-              <th style={{padding:'0.5rem'}}>Student</th>
-              <th style={{padding:'0.5rem'}}>Unit</th>
-              <th style={{padding:'0.5rem'}}>Cam 1</th>
-              <th style={{padding:'0.5rem'}}>Cam 2</th>
-              <th style={{padding:'0.5rem'}}>Cam 3</th>
-              <th style={{padding:'0.5rem'}}>Average</th>
-              <th style={{padding:'0.5rem'}}>Edit</th>
-              <th style={{padding:'0.5rem'}}>Delete</th>
+            <tr style={{ background: '#18181b' }}>
+              <th>Student</th><th>Unit</th><th>Cam 1</th><th>Cam 2</th><th>Cam 3</th><th>Average</th><th>Edit</th><th>Delete</th>
             </tr>
           </thead>
           <tbody>
-            {results.map(r => (
-              <tr key={r._id} style={{background:'#23232b',borderBottom:'1px solid #444'}}>
-                <td style={{padding:'0.5rem'}}>{typeof r.student === 'string' ? r.student : (r.student && typeof r.student === 'object' ? `${r.student.firstName || ''} ${r.student.lastName || ''} (${r.student.email || ''})` : 'Unknown Student')}</td>
-                {editId === r._id ? (
-                  <>
-                    <td style={{padding:'0.5rem'}}><input name="unit" value={editForm.unit} onChange={handleEditChange} style={{width:'100%',padding:'0.3rem',borderRadius:4,border:'1px solid #444',background:'#18181b',color:'#fff'}} /></td>
-                    <td style={{padding:'0.5rem'}}><input name="cam1" type="number" value={editForm.cam1} onChange={handleEditChange} style={{width:'100%',padding:'0.3rem',borderRadius:4,border:'1px solid #444',background:'#18181b',color:'#fff'}} /></td>
-                    <td style={{padding:'0.5rem'}}><input name="cam2" type="number" value={editForm.cam2} onChange={handleEditChange} style={{width:'100%',padding:'0.3rem',borderRadius:4,border:'1px solid #444',background:'#18181b',color:'#fff'}} /></td>
-                    <td style={{padding:'0.5rem'}}><input name="cam3" type="number" value={editForm.cam3} onChange={handleEditChange} style={{width:'100%',padding:'0.3rem',borderRadius:4,border:'1px solid #444',background:'#18181b',color:'#fff'}} /></td>
-                    <td style={{padding:'0.5rem'}}><input name="average" value={editForm.average} readOnly style={{width:'100%',padding:'0.3rem',borderRadius:4,border:'1px solid #444',background:'#18181b',color:'#fff'}} /></td>
-                    <td style={{padding:'0.5rem'}} colSpan={2}>
-                      <button onClick={saveEdit} disabled={saving} style={{background:'#22c55e',color:'#fff',border:'none',borderRadius:6,padding:'0.3rem 1rem',fontWeight:600,cursor:'pointer',marginRight:8}}>{saving ? 'Saving...' : 'Save'}</button>
-                      <button onClick={cancelEdit} style={{background:'#ef4444',color:'#fff',border:'none',borderRadius:6,padding:'0.3rem 1rem',fontWeight:600,cursor:'pointer'}}>Cancel</button>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td style={{padding:'0.5rem'}}>{r.unit}</td>
-                    <td style={{padding:'0.5rem'}}>{r.cam1?.score || 0}/{r.cam1?.outOf || 100}</td>
-                    <td style={{padding:'0.5rem'}}>{r.cam2?.score || 0}/{r.cam2?.outOf || 100}</td>
-                    <td style={{padding:'0.5rem'}}>{r.cam3?.score || 0}/{r.cam3?.outOf || 100}</td>
-                    <td style={{padding:'0.5rem'}}>{r.average}%</td>
-                    <td style={{padding:'0.5rem'}}><button onClick={() => startEdit(r)} style={{background:'#2563eb',color:'#fff',border:'none',borderRadius:6,padding:'0.3rem 1rem',fontWeight:600,cursor:'pointer'}}>Edit</button></td>
-                    <td style={{padding:'0.5rem'}}><button onClick={() => deleteResult(r._id)} disabled={deleting === r._id} style={{background:'#ef4444',color:'#fff',border:'none',borderRadius:6,padding:'0.3rem 1rem',fontWeight:600,cursor:'pointer'}}>{deleting === r._id ? 'Deleting...' : 'Delete'}</button></td>
-                  </>
-                )}
-              </tr>
-            ))}
+            {results.map(r => {
+              const isEditing = editId === r._id;
+              const studentLabel = typeof r.student === 'string' ? r.student : `${r.student.firstName} ${r.student.lastName} (${r.student.email})`;
+              return (
+                <tr key={r._id} style={{ background: '#23232b', borderBottom: '1px solid #444' }}>
+                  <td>{studentLabel}</td>
+                  {isEditing ? (
+                    <>
+                      {['unit', 'cam1', 'cam2', 'cam3'].map(field => (
+                        <td key={field}>
+                          <input name={field} type={field.startsWith('cam') ? 'number' : 'text'} value={editForm[field as keyof typeof editForm]} onChange={handleEditChange} style={{ width: '100%', padding: '0.3rem', borderRadius: 4, border: '1px solid #444', background: '#18181b', color: '#fff' }} />
+                        </td>
+                      ))}
+                      <td>
+                        <input name="average" value={editForm.average} readOnly style={{ width: '100%', padding: '0.3rem', borderRadius: 4, border: '1px solid #444', background: '#18181b', color: '#fff' }} />
+                      </td>
+                      <td colSpan={2}>
+                        <button onClick={saveEdit} disabled={saving} style={{ background: '#22c55e', color: '#fff', border: 'none', borderRadius: 6, padding: '0.3rem 1rem', fontWeight: 600, marginRight: 8 }}>{saving ? 'Saving...' : 'Save'}</button>
+                        <button onClick={cancelEdit} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, padding: '0.3rem 1rem', fontWeight: 600 }}>Cancel</button>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td>{r.unit}</td>
+                      <td>{r.cam1.score}/{r.cam1.outOf}</td>
+                      <td>{r.cam2.score}/{r.cam2.outOf}</td>
+                      <td>{r.cam3.score}/{r.cam3.outOf}</td>
+                      <td>{r.average}%</td>
+                      <td><button onClick={() => startEdit(r)} style={{ background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, padding: '0.3rem 1rem', fontWeight: 600 }}>Edit</button></td>
+                      <td><button onClick={() => deleteResult(r._id)} disabled={deleting === r._id} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, padding: '0.3rem 1rem', fontWeight: 600 }}>{deleting === r._id ? 'Deleting...' : 'Delete'}</button></td>
+                    </>
+                  )}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
@@ -154,4 +176,4 @@ const ExamResultsList: React.FC = () => {
   );
 };
 
-export default ExamResultsList; 
+export default ExamResultsList;

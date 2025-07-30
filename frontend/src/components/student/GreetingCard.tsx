@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 const quotes = [
   'Success is not the key to happiness. Happiness is the key to success.',
@@ -24,19 +25,18 @@ const GreetingCard: React.FC = () => {
   const name = user ? user.firstName : 'Student';
   const quote = quotes[new Date().getDay() % quotes.length];
 
-  const [classesToday, setClassesToday] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [todaysClasses, setTodaysClasses] = useState<number | null>(null);
+  const [loading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
-    fetch(`http://localhost:5000/api/class/student-today/${user.id}`, {
+    
+    fetch(`${API_ENDPOINTS.STUDENT_CLASSES}/${user.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
-      .then(data => setClassesToday(Array.isArray(data) ? data.length : 0))
-      .catch(() => setClassesToday(0))
-      .finally(() => setLoading(false));
+      .then(data => setTodaysClasses(data.length))
+      .catch(err => console.error('Error fetching today\'s classes:', err));
   }, [user, token]);
 
   return (
@@ -53,7 +53,7 @@ const GreetingCard: React.FC = () => {
         <div className="stat-item">
           <span className="stat-icon">📚</span>
           <div className="stat-content">
-            <span className="stat-number">{loading ? '...' : classesToday ?? 0}</span>
+            <span className="stat-number">{loading ? '...' : todaysClasses ?? 0}</span>
             <span className="stat-label">Classes Today</span>
           </div>
         </div>

@@ -105,14 +105,14 @@
     letter-spacing: 0.5px;
   }
   
-  /* Hide school logo and name on very small screens */
-  .header-center {
+  /* Hide only school name, keep logo */
+  .school-name {
     display: none;
   }
   
-  .school-logo,
-  .school-name {
-    display: none;
+  .school-logo {
+    width: 28px;
+    height: 28px;
   }
   
   .account-icon {
@@ -146,14 +146,14 @@
     letter-spacing: 0.8px;
   }
   
-  /* Hide school logo and name on very small screens */
-  .header-center {
+  /* Hide only school name, keep logo */
+  .school-name {
     display: none;
   }
   
-  .school-logo,
-  .school-name {
-    display: none;
+  .school-logo {
+    width: 32px;
+    height: 32px;
   }
   
   .account-icon {
@@ -187,14 +187,14 @@
     letter-spacing: 1px;
   }
   
-  /* Hide school logo and name on very small screens */
-  .header-center {
+  /* Hide only school name, keep logo */
+  .school-name {
     display: none;
   }
   
-  .school-logo,
-  .school-name {
-    display: none;
+  .school-logo {
+    width: 36px;
+    height: 36px;
   }
   
   .account-icon {

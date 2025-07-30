@@ -4,6 +4,7 @@ import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { API_ENDPOINTS } from '../../config/api';
 
 const locales = { 'en-US': enUS };
 const localizer = dateFnsLocalizer({
@@ -39,7 +40,7 @@ const TeacherCalendar: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    fetch(`http://localhost:5000/api/class/teacher/${user.id}`, {
+    fetch(`${API_ENDPOINTS.CLASSES}/teacher/${user.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -62,7 +63,7 @@ const TeacherCalendar: React.FC = () => {
   }, [user, token, modalOpen]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/exam-result/students', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_ENDPOINTS.EXAM_RESULTS}/students`, { headers: { Authorization: `Bearer ${token}` } })
       .then(res => res.json())
       .then(data => setStudents(Array.isArray(data) ? data : []))
       .catch(() => setStudents([]));
@@ -94,7 +95,7 @@ const TeacherCalendar: React.FC = () => {
   const saveEdit = async () => {
     if (!editClass) return;
     setSaving(true);
-    await fetch(`http://localhost:5000/api/class/${editClass._id}`, {
+    await fetch(`${API_ENDPOINTS.CLASSES}/${editClass._id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({
@@ -135,7 +136,7 @@ const TeacherCalendar: React.FC = () => {
 
   const saveCreate = async () => {
     setCreating(true);
-    await fetch('http://localhost:5000/api/class/publish', {
+    await fetch(`${API_ENDPOINTS.PUBLISH_CLASS}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({

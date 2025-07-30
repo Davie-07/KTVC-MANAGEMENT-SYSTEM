@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Message {
   _id: string;
@@ -13,34 +14,37 @@ interface Message {
 const Messages: React.FC = () => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [marking, setMarking] = useState<string | null>(null);
+  const [loading] = useState(false);
+  const [marking] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
-    fetch(`http://localhost:5000/api/message/user/${user.id}`)
+    
+    fetch(`${API_ENDPOINTS.MESSAGES_USER}/${user.id}`)
       .then(res => res.json())
       .then(data => setMessages(Array.isArray(data) ? data : []))
-      .catch(() => setMessages([]))
-      .finally(() => setLoading(false));
+      .catch(err => console.error('Error fetching conversations:', err));
   }, [user]);
 
   const unseenMessages = user ? messages.filter(m => m.unreadBy && m.unreadBy.includes(user.id)) : [];
 
   const markAsRead = async (messageId: string) => {
-    if (!user || !user.id) return;
-    setMarking(messageId);
-    await fetch(`http://localhost:5000/api/message/${messageId}/read`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id })
-    });
-    setMarking(null);
-    // Refresh list
-    fetch(`http://localhost:5000/api/message/user/${user.id}`)
-      .then(res => res.json())
-      .then(data => setMessages(Array.isArray(data) ? data : []));
+    if (!user) return;
+    
+    try {
+      await fetch(`${API_ENDPOINTS.MESSAGES_READ}/${messageId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      // Refresh conversations
+      fetch(`${API_ENDPOINTS.MESSAGES_USER}/${user.id}`)
+        .then(res => res.json())
+        .then(data => setMessages(Array.isArray(data) ? data : []))
+        .catch(err => console.error('Error refreshing conversations:', err));
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
   };
 
   return (

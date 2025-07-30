@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Student {
   _id: string;
@@ -33,23 +34,22 @@ const Friends: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     setLoading(true);
     Promise.all([
-      fetch('http://localhost:5000/api/friends/all').then(res => res.json()),
-      fetch(`http://localhost:5000/api/friends/requests/${user.id}`).then(res => res.json()),
-      fetch(`http://localhost:5000/api/friends/friends/${user.id}`).then(res => res.json())
+      fetch(`${API_ENDPOINTS.FRIENDS_ALL}`).then(res => res.json()),
+      fetch(`${API_ENDPOINTS.FRIENDS_REQUESTS}/${user.id}`).then(res => res.json()),
+      fetch(`${API_ENDPOINTS.FRIENDS_FRIENDS}/${user.id}`).then(res => res.json())
     ])
-      .then(([all, reqs, frs]) => {
-        setStudents(Array.isArray(all) ? all.filter((s: Student) => s._id !== user.id) : []);
-        setRequests(Array.isArray(reqs) ? reqs : []);
-        setFriends(Array.isArray(frs) ? frs : []);
+      .then(([allUsers, requests, friends]) => {
+        setStudents(allUsers.filter((s: Student) => s._id !== user.id));
+        setRequests(requests);
+        setFriends(friends);
       })
-      .catch(() => {
-        setStudents([]); setRequests([]); setFriends([]);
-      })
+      .catch(err => console.error('Error fetching data:', err))
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -63,45 +63,87 @@ const Friends: React.FC = () => {
     if (!user) return;
     setActionLoading(true);
     setError(null);
-    const res = await fetch('http://localhost:5000/api/friends/request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fromId: user.id, toId })
-    });
-    const data = await res.json();
-    if (!res.ok) setError(data.message || 'Failed to send request.');
-    setActionLoading(false);
-    window.location.reload();
+    try {
+      const res = await fetch(API_ENDPOINTS.FRIENDS_REQUEST, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fromId: user.id, toId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to send request.');
+      setSuccess('Friend request sent!');
+      // Refresh data
+      const [allUsers, requests, friends] = await Promise.all([
+        fetch(API_ENDPOINTS.FRIENDS_ALL).then(res => res.json()),
+        fetch(`${API_ENDPOINTS.FRIENDS_REQUESTS}/${user?.id}`).then(res => res.json()),
+        fetch(`${API_ENDPOINTS.FRIENDS_FRIENDS}/${user?.id}`).then(res => res.json())
+      ]);
+      setStudents(allUsers.filter((s: Student) => s._id !== user.id));
+      setRequests(requests);
+      setFriends(friends);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send request.');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const acceptRequest = async (fromId: string) => {
     if (!user) return;
     setActionLoading(true);
     setError(null);
-    const res = await fetch('http://localhost:5000/api/friends/accept', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, fromId })
-    });
-    const data = await res.json();
-    if (!res.ok) setError(data.message || 'Failed to accept request.');
-    setActionLoading(false);
-    window.location.reload();
+    try {
+      const res = await fetch(API_ENDPOINTS.FRIENDS_ACCEPT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, fromId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to accept request.');
+      setSuccess('Friend request accepted!');
+      // Refresh data
+      const [allUsers, requests, friends] = await Promise.all([
+        fetch(API_ENDPOINTS.FRIENDS_ALL).then(res => res.json()),
+        fetch(`${API_ENDPOINTS.FRIENDS_REQUESTS}/${user?.id}`).then(res => res.json()),
+        fetch(`${API_ENDPOINTS.FRIENDS_FRIENDS}/${user?.id}`).then(res => res.json())
+      ]);
+      setStudents(allUsers.filter((s: Student) => s._id !== user.id));
+      setRequests(requests);
+      setFriends(friends);
+    } catch (err: any) {
+      setError(err.message || 'Failed to accept request.');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const rejectRequest = async (fromId: string) => {
     if (!user) return;
     setActionLoading(true);
     setError(null);
-    const res = await fetch('http://localhost:5000/api/friends/reject', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, fromId })
-    });
-    const data = await res.json();
-    if (!res.ok) setError(data.message || 'Failed to reject request.');
-    setActionLoading(false);
-    window.location.reload();
+    try {
+      const res = await fetch(API_ENDPOINTS.FRIENDS_REJECT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, fromId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to reject request.');
+      setSuccess('Friend request rejected!');
+      // Refresh data
+      const [allUsers, requests, friends] = await Promise.all([
+        fetch(API_ENDPOINTS.FRIENDS_ALL).then(res => res.json()),
+        fetch(`${API_ENDPOINTS.FRIENDS_REQUESTS}/${user?.id}`).then(res => res.json()),
+        fetch(`${API_ENDPOINTS.FRIENDS_FRIENDS}/${user?.id}`).then(res => res.json())
+      ]);
+      setStudents(allUsers.filter((s: Student) => s._id !== user.id));
+      setRequests(requests);
+      setFriends(friends);
+    } catch (err: any) {
+      setError(err.message || 'Failed to reject request.');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   // Messaging
@@ -109,26 +151,52 @@ const Friends: React.FC = () => {
     setChatFriend(friend);
     setMessages([]);
     setLoading(true);
-    const res = await fetch(`http://localhost:5000/api/message/user/${user?.id}`);
-    const data = await res.json();
-    setMessages(Array.isArray(data) ? data.filter((m: Message) =>
-      (m.sender === user?.id && m.recipient === friend._id) ||
-      (m.sender === friend._id && m.recipient === user?.id)
-    ) : []);
-    setLoading(false);
+    try {
+      const res = await fetch(`${API_ENDPOINTS.MESSAGES_USER}/${user?.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(Array.isArray(data) ? data.filter((m: Message) =>
+          (m.sender === user?.id && m.recipient === friend._id) ||
+          (m.sender === friend._id && m.recipient === user?.id)
+        ) : []);
+      }
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const sendMessage = async () => {
     if (!user || !chatFriend || !newMessage.trim()) return;
     setSending(true);
-    await fetch('http://localhost:5000/api/message', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sender: user.id, recipient: chatFriend._id, content: newMessage })
-    });
-    setNewMessage('');
-    openChat(chatFriend);
-    setSending(false);
+    try {
+      const res = await fetch(`${API_ENDPOINTS.MESSAGES_USER}/${user?.id}`);
+      if (res.ok) {
+        const conversation = await res.json();
+        const conversationId = conversation._id;
+        
+        await fetch(API_ENDPOINTS.MESSAGES, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId,
+            senderId: user?.id,
+            receiverId: chatFriend._id,
+            content: newMessage
+          })
+        });
+        
+        setNewMessage('');
+        setSuccess('Message sent!');
+        openChat(chatFriend);
+      }
+    } catch (err) {
+      console.error('Error sending message:', err);
+      setError('Failed to send message.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -140,6 +208,7 @@ const Friends: React.FC = () => {
         <button onClick={() => setTab('friends')} style={{background:tab==='friends'?'#2563eb':'#18181b',color:'#fff',border:'none',borderRadius:6,padding:'0.5rem 1.5rem',fontWeight:600,cursor:'pointer'}}>Friends</button>
       </div>
       {error && <div style={{color:'#ef4444',marginBottom:'0.7rem'}}>{error}</div>}
+      {success && <div style={{color:'#22c55e',marginBottom:'0.7rem'}}>{success}</div>}
       {tab === 'all' && (
         <div>
           <input type="text" placeholder="Search students..." value={studentSearch} onChange={e => setStudentSearch(e.target.value)} style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff',marginBottom:'1rem'}} />

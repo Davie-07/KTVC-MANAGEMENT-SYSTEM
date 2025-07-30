@@ -18,6 +18,7 @@ import Settings from '../components/Settings';
 import Footer from '../components/Footer';
 import AdminGreetingCard from '../components/admin/AdminGreetingCard';
 import AdminDashboardStats from '../components/admin/AdminDashboardStats';
+import AdminNotificationPanel from '../components/admin/AdminNotificationPanel';
 import { useAuth } from '../context/AuthContext';
 
 const FeesManagement = () => <div style={{color:'#fff'}}>Fees Management (View/Edit All Students' Fees)</div>;
@@ -59,6 +60,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ activeTab, onTabChange 
           
           <div className="card-full">
             <GrowthCharts />
+          </div>
+          
+          <div className="card-full">
+            <AdminNotificationPanel />
           </div>
         </div>
       );

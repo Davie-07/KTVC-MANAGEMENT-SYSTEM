@@ -34,8 +34,8 @@ router.use(authenticate, requireAdmin);
 // Create a course
 router.post('/', async (req: AuthRequest, res) => {
   try {
-    const { name, description, levels, duration } = req.body;
-    const course = await Course.create({ name, description, levels, duration });
+    const { name, description, levels, duration, published } = req.body;
+    const course = await Course.create({ name, description, levels, duration, published });
     res.status(201).json(course);
   } catch (err) {
     res.status(500).json({ message: 'Failed to create course.', error: err });
@@ -56,8 +56,8 @@ router.get('/', async (_req, res) => {
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const { name, description, levels, duration } = req.body;
-    const updated = await Course.findByIdAndUpdate(id, { name, description, levels, duration }, { new: true });
+    const { name, description, levels, duration, published } = req.body;
+    const updated = await Course.findByIdAndUpdate(id, { name, description, levels, duration, published }, { new: true });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: 'Failed to update course.', error: err });

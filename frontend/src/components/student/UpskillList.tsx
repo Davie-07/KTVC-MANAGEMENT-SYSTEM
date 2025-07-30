@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Upskill {
   _id: string;
@@ -11,35 +12,23 @@ interface Upskill {
 }
 
 const UpskillList: React.FC = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [upskills, setUpskills] = useState<Upskill[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [enrollingId, setEnrollingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchUpskills();
-  }, []);
-
-  const fetchUpskills = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`http://localhost:5000/api/upskill/user/${user?.id}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUpskills(data);
-      }
-    } catch (error) {
-      setError('Failed to fetch upskills');
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (!user) return;
+    
+    fetch(`${API_ENDPOINTS.UPSKILL_USER}/${user?.id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setUpskills(data))
+      .catch(err => console.error('Error fetching upskill opportunities:', err));
+  }, [user, token]);
 
   const handleEnroll = async (upskill: Upskill) => {
     if (!window.confirm(`Are you sure you want to enroll in "${upskill.title}" for ${upskill.price} ${upskill.currency}?`)) {
@@ -52,11 +41,11 @@ const UpskillList: React.FC = () => {
 
     try {
       // Initialize payment
-      const response = await fetch('http://localhost:5000/api/upskill/enroll', {
+      const response = await fetch(API_ENDPOINTS.UPSKILL_ENROLL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           upskillId: upskill._id,
@@ -79,14 +68,21 @@ const UpskillList: React.FC = () => {
         }
         
         // Mark as seen
-        await fetch(`http://localhost:5000/api/upskill/${upskill._id}/seen`, {
-          method: 'PATCH',
+        await fetch(`${API_ENDPOINTS.UPSKILL_SEEN}/${upskill._id}`, {
+          method: 'PUT',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ userId: user?.id })
         });
         
-        fetchUpskills();
+        fetch(`${API_ENDPOINTS.UPSKILL_USER}/${user?.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(data => setUpskills(data))
+          .catch(err => console.error('Error refreshing upskill opportunities:', err));
       } else {
         const data = await response.json();
         setError(data.message || 'Failed to enroll');
@@ -100,17 +96,16 @@ const UpskillList: React.FC = () => {
 
   const initiateMpesaPayment = async (upskill: Upskill) => {
     try {
-      const response = await fetch('http://localhost:5000/api/payment/mpesa/initiate', {
+      const response = await fetch(API_ENDPOINTS.PAYMENT_MPESA_INITIATE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           amount: upskill.price,
-          phone: (user as any)?.phone || '',
-          reference: `UPSKILL_${upskill._id}_${user?.id}`,
-          description: `Enrollment in ${upskill.title}`
+          description: `Enrollment in ${upskill.title}`,
+          phoneNumber: user?.email || ''
         })
       });
 

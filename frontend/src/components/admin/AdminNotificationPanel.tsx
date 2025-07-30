@@ -12,7 +12,7 @@ interface Notification {
   relatedId?: string;
 }
 
-const StudentNotificationPanel: React.FC = () => {
+const AdminNotificationPanel: React.FC = () => {
   const { user, token } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -23,7 +23,7 @@ const StudentNotificationPanel: React.FC = () => {
     
     const fetchNotifications = async () => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}/student/${user?.id}`, {
+        const response = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}/admin/${user?.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -149,4 +149,4 @@ const StudentNotificationPanel: React.FC = () => {
   );
 };
 
-export default StudentNotificationPanel; 
+export default AdminNotificationPanel; 

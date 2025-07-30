@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Upskill {
   _id: string;
@@ -23,39 +25,42 @@ const UpskillManagement: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const { token } = useAuth();
 
   useEffect(() => {
-    fetchUpskills();
-  }, []);
-
-  const fetchUpskills = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost:5000/api/upskill', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const fetchUpskill = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(API_ENDPOINTS.UPSKILL, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUpskills(data);
         }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUpskills(data);
+      } catch (error) {
+        console.error('Error fetching upskill opportunities:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      setError('Failed to fetch upskills');
-    } finally {
-      setLoading(false);
+    };
+    
+    if (token) {
+      fetchUpskill();
     }
-  };
+  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-
     try {
+      setSubmitting(true);
       const url = editingId 
-        ? `http://localhost:5000/api/upskill/${editingId}`
-        : 'http://localhost:5000/api/upskill';
+        ? `${API_ENDPOINTS.UPSKILL}/${editingId}`
+        : API_ENDPOINTS.UPSKILL;
       
       const method = editingId ? 'PUT' : 'POST';
       
@@ -63,27 +68,30 @@ const UpskillManagement: React.FC = () => {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(formData)
       });
-
+      
       if (response.ok) {
-        setSuccess(editingId ? 'Upskill updated successfully' : 'Upskill created successfully');
-        setFormData({
-          title: '',
-          description: '',
-          price: 0,
-          currency: 'KSH',
-        });
+        const saved = await response.json();
+        if (editingId) {
+          setUpskills(prev => prev.map(u => u._id === editingId ? saved : u));
+        } else {
+          setUpskills(prev => [...prev, saved]);
+        }
+        setFormData({ title: '', description: '', price: 0, currency: 'KSH' });
         setEditingId(null);
-        fetchUpskills();
+        setSuccess(editingId ? 'Upskill updated successfully!' : 'Upskill created successfully!');
       } else {
         const data = await response.json();
         setError(data.message || 'Failed to save upskill');
       }
     } catch (error) {
       setError('Failed to save upskill');
+      console.error('Error:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -99,23 +107,22 @@ const UpskillManagement: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this upskill?')) return;
-
+    
     try {
-      const response = await fetch(`http://localhost:5000/api/upskill/${id}`, {
+      const response = await fetch(`${API_ENDPOINTS.UPSKILL}/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-
+      
       if (response.ok) {
-        setSuccess('Upskill deleted successfully');
-        fetchUpskills();
+        setUpskills(prev => prev.filter(u => u._id !== id));
+        setSuccess('Upskill deleted successfully!');
       } else {
         setError('Failed to delete upskill');
       }
     } catch (error) {
-      setError('Failed to delete upskill');
+      setError('Error deleting upskill');
+      console.error('Error:', error);
     }
   };
 
@@ -132,23 +139,26 @@ const UpskillManagement: React.FC = () => {
 
   const toggleActive = async (id: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/upskill/${id}/toggle`, {
-        method: 'PATCH',
+      const response = await fetch(`${API_ENDPOINTS.UPSKILL_TOGGLE}/${id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ isActive: !currentStatus })
       });
-
+      
       if (response.ok) {
+        setUpskills(prev => prev.map(u => 
+          u._id === id ? { ...u, isActive: !currentStatus } : u
+        ));
         setSuccess(`Upskill ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
-        fetchUpskills();
       } else {
         setError('Failed to update upskill status');
       }
     } catch (error) {
-      setError('Failed to update upskill status');
+      setError('Error updating upskill status');
+      console.error('Error:', error);
     }
   };
 
@@ -206,11 +216,11 @@ const UpskillManagement: React.FC = () => {
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="btn-primary">
-            {editingId ? 'Update Upskill' : 'Create Upskill'}
+          <button type="submit" className="btn-primary" disabled={submitting}>
+            {submitting ? 'Saving...' : (editingId ? 'Update Upskill' : 'Create Upskill')}
           </button>
           {editingId && (
-            <button type="button" onClick={handleCancel} className="btn-secondary">
+            <button type="button" onClick={handleCancel} className="btn-secondary" disabled={submitting}>
               Cancel
             </button>
           )}

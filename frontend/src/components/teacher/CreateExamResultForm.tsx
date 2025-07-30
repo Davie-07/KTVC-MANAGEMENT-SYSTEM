@@ -1,329 +1,390 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Student {
   _id: string;
   firstName: string;
   lastName: string;
   email: string;
+  course: string;
+}
+
+interface ExamResult {
+  _id: string;
+  studentId: string;
+  unit: string;
+  cam1: { score: number; outOf: number };
+  cam2: { score: number; outOf: number };
+  cam3: { score: number; outOf: number };
+  average: number;
+  createdAt: string;
 }
 
 const CreateExamResultForm: React.FC = () => {
-  const { user, token } = useAuth();
-  const [form, setForm] = useState({ 
-    student: '', 
-    unit: '', 
-    cam1: { score: '', outOf: '100' }, 
-    cam2: { score: '', outOf: '100' }, 
-    cam3: { score: '', outOf: '100' }, 
-    average: '' 
-  });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
-  const [studentSearch, setStudentSearch] = useState('');
-  const [studentsLoading, setStudentsLoading] = useState(false);
-  const [selectedStudent, _setSelectedStudent] = useState<string>('');
-  const [history, setHistory] = useState<any[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
-
-  if (!user || (user.role !== 'teacher' && user.role !== 'admin')) return null;
+  const [selectedStudent, setSelectedStudent] = useState('');
+  const [studentHistory, setStudentHistory] = useState<ExamResult[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  
+  const [form, setForm] = useState({
+    unit: '',
+    cam1: { score: 0, outOf: 100 },
+    cam2: { score: 0, outOf: 100 },
+    cam3: { score: 0, outOf: 100 }
+  });
 
   useEffect(() => {
-    setStudentsLoading(true);
-    fetch('http://localhost:5000/api/exam-result/students', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => setStudents(Array.isArray(data) ? data : []))
-      .catch(() => setStudents([]))
-      .finally(() => setStudentsLoading(false));
+    const fetchStudents = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINTS.EXAM_RESULTS_STUDENTS}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setStudents(data);
+        }
+      } catch (error) {
+        console.error('Error fetching students:', error);
+      }
+    };
+
+    if (token) {
+      fetchStudents();
+    }
   }, [token]);
 
   useEffect(() => {
-    if (!selectedStudent) {
-      setHistory([]);
-      return;
+    if (selectedStudent) {
+      const fetchStudentHistory = async () => {
+        try {
+          const response = await fetch(`${API_ENDPOINTS.EXAM_RESULTS_HISTORY}/${selectedStudent}`);
+          if (response.ok) {
+            const data = await response.json();
+            setStudentHistory(data);
+          }
+        } catch (error) {
+          console.error('Error fetching student history:', error);
+        }
+      };
+      fetchStudentHistory();
     }
-    setLoadingHistory(true);
-    fetch(`http://localhost:5000/api/exam-result/history/${selectedStudent}`)
-      .then(res => res.json())
-      .then(data => setHistory(Array.isArray(data) ? data : []))
-      .catch(() => setHistory([]))
-      .finally(() => setLoadingHistory(false));
   }, [selectedStudent]);
 
-  const filteredStudents = students.filter(s =>
-    s.firstName.toLowerCase().includes(studentSearch.toLowerCase()) ||
-    s.lastName.toLowerCase().includes(studentSearch.toLowerCase()) ||
-    s.email.toLowerCase().includes(studentSearch.toLowerCase())
-  );
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCamChange = (camNumber: number, field: 'score' | 'outOf', value: string) => {
+    const numValue = parseFloat(value) || 0;
+    setForm(prev => ({
+      ...prev,
+      [`cam${camNumber}`]: {
+        ...prev[`cam${camNumber}` as keyof typeof prev] as { score: number; outOf: number },
+        [field]: numValue
+      }
+    }));
+  };
 
   const calculateAverage = () => {
-    const cam1Score = parseFloat(form.cam1.score);
-    const cam1OutOf = parseFloat(form.cam1.outOf);
-    const cam2Score = parseFloat(form.cam2.score);
-    const cam2OutOf = parseFloat(form.cam2.outOf);
-    const cam3Score = parseFloat(form.cam3.score);
-    const cam3OutOf = parseFloat(form.cam3.outOf);
-
-    const validCams = [];
-    if (!isNaN(cam1Score) && !isNaN(cam1OutOf) && cam1OutOf > 0) {
-      validCams.push((cam1Score / cam1OutOf) * 100);
-    }
-    if (!isNaN(cam2Score) && !isNaN(cam2OutOf) && cam2OutOf > 0) {
-      validCams.push((cam2Score / cam2OutOf) * 100);
-    }
-    if (!isNaN(cam3Score) && !isNaN(cam3OutOf) && cam3OutOf > 0) {
-      validCams.push((cam3Score / cam3OutOf) * 100);
-    }
-
-    if (validCams.length > 0) {
-      const average = validCams.reduce((sum, score) => sum + score, 0) / validCams.length;
-      setForm(prev => ({ ...prev, average: average.toFixed(2) }));
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const cam1Percentage = form.cam1.outOf > 0 ? (form.cam1.score / form.cam1.outOf) * 100 : 0;
+    const cam2Percentage = form.cam2.outOf > 0 ? (form.cam2.score / form.cam2.outOf) * 100 : 0;
+    const cam3Percentage = form.cam3.outOf > 0 ? (form.cam3.score / form.cam3.outOf) * 100 : 0;
     
-    if (name.startsWith('cam')) {
-      const [cam, field] = name.split('.');
-      setForm(prev => ({
-        ...prev,
-        [cam]: { ...(prev[cam as keyof typeof prev] as any), [field]: value }
-      }));
-    } else {
-      setForm(prev => ({ ...prev, [name]: value }));
-    }
+    const totalPercentage = cam1Percentage + cam2Percentage + cam3Percentage;
+    const average = totalPercentage / 3;
+    
+    return Math.round(average * 100) / 100; // Round to 2 decimal places
   };
-
-  useEffect(() => {
-    calculateAverage();
-  }, [form.cam1.score, form.cam1.outOf, form.cam2.score, form.cam2.outOf, form.cam3.score, form.cam3.outOf]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setSuccess(null);
-    setError(null);
+    if (!selectedStudent || !form.unit) {
+      setError('Please select a student and enter a unit/subject');
+      return;
+    }
+
+    if (form.cam1.score > form.cam1.outOf || form.cam2.score > form.cam2.outOf || form.cam3.score > form.cam3.outOf) {
+      setError('Score cannot be greater than the maximum score');
+      return;
+    }
+
     try {
-      const res = await fetch('http://localhost:5000/api/exam-result', {
+      setSubmitting(true);
+      setError(null);
+      setSuccess(null);
+
+      const average = calculateAverage();
+      const examData = {
+        studentId: selectedStudent,
+        unit: form.unit,
+        cam1: form.cam1,
+        cam2: form.cam2,
+        cam3: form.cam3,
+        average: average
+      };
+
+      const response = await fetch(API_ENDPOINTS.EXAM_RESULTS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          student: form.student,
-          unit: form.unit,
-          cam1: {
-            score: parseFloat(form.cam1.score) || 0,
-            outOf: parseFloat(form.cam1.outOf) || 100
-          },
-          cam2: {
-            score: parseFloat(form.cam2.score) || 0,
-            outOf: parseFloat(form.cam2.outOf) || 100
-          },
-          cam3: {
-            score: parseFloat(form.cam3.score) || 0,
-            outOf: parseFloat(form.cam3.outOf) || 100
-          },
-          average: parseFloat(form.average),
-          changedBy: user.id
-        }),
+        body: JSON.stringify(examData)
       });
-      const data = await res.json();
-      if (res.ok) {
+
+      if (response.ok) {
         setSuccess('Exam result created successfully!');
-        setForm({ 
-          student: '', 
-          unit: '', 
-          cam1: { score: '', outOf: '100' }, 
-          cam2: { score: '', outOf: '100' }, 
-          cam3: { score: '', outOf: '100' }, 
-          average: '' 
+        setForm({
+          unit: '',
+          cam1: { score: 0, outOf: 100 },
+          cam2: { score: 0, outOf: 100 },
+          cam3: { score: 0, outOf: 100 }
         });
+        setSelectedStudent('');
+        // Refresh student history
+        if (selectedStudent) {
+          const historyResponse = await fetch(`${API_ENDPOINTS.EXAM_RESULTS_HISTORY}/${selectedStudent}`);
+          if (historyResponse.ok) {
+            const historyData = await historyResponse.json();
+            setStudentHistory(historyData);
+          }
+        }
       } else {
-        setError(data.message || 'Failed to create exam result.');
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to create exam result');
       }
-    } catch {
-      setError('Network error.');
+    } catch (error) {
+      setError('Error creating exam result');
+      console.error('Error:', error);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
+  const selectedStudentData = students.find(s => s._id === selectedStudent);
+  const average = calculateAverage();
+
   return (
-    <form onSubmit={handleSubmit} className="exam-result-form">
-      <h3>📊 Enter Exam Result</h3>
-      {success && <div className="success-message">{success}</div>}
-      {error && <div className="error-message">{error}</div>}
+    <div style={{ color: '#fff', padding: '1rem' }}>
+      <h2>Create Exam Result</h2>
       
-      <div className="form-group">
-        <label>Student</label>
-        <input
-          type="text"
-          placeholder="Search by name or email..."
-          value={studentSearch}
-          onChange={e => setStudentSearch(e.target.value)}
-          className="form-input"
-        />
-        <select
-          name="student"
-          value={form.student}
-          onChange={handleChange}
-          required
-          className="form-select"
-          disabled={studentsLoading}
-        >
-          <option value="">Select student...</option>
-          {filteredStudents.map(s => (
-            <option key={s._id} value={s._id}>{s.firstName} {s.lastName} ({s.email})</option>
-          ))}
-        </select>
-      </div>
+      {error && (
+        <div style={{ background: '#dc2626', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem' }}>
+          {error}
+        </div>
+      )}
       
-      <div className="form-group">
-        <label>Unit/Subject</label>
-        <input 
-          name="unit" 
-          value={form.unit} 
-          onChange={handleChange} 
-          required 
-          className="form-input"
-          placeholder="e.g., Mathematics, Physics, etc."
-        />
-      </div>
-      
-      <div className="cam-scores">
-        <div className="cam-group">
-          <label>CAM 1</label>
-          <div className="score-inputs">
-            <input 
-              name="cam1.score" 
-              type="number" 
-              value={form.cam1.score} 
-              onChange={handleChange} 
-              min={0} 
-              className="form-input score-input"
-              placeholder="Score"
-            />
-            <span className="score-separator">/</span>
-            <input 
-              name="cam1.outOf" 
-              type="number" 
-              value={form.cam1.outOf} 
-              onChange={handleChange} 
-              min={1} 
-              className="form-input out-of-input"
-              placeholder="Out of"
+      {success && (
+        <div style={{ background: '#059669', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem' }}>
+          {success}
+        </div>
+      )}
+
+      <div style={{ background: '#374151', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem' }}>
+        <h3>Exam Details</h3>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '1rem' }}>
+            <label>Select Student:</label>
+            <select
+              value={selectedStudent}
+              onChange={(e) => setSelectedStudent(e.target.value)}
+              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+              required
+            >
+              <option value="">Choose a student...</option>
+              {students.map(student => (
+                <option key={student._id} value={student._id}>
+                  {student.firstName} {student.lastName} - {student.course}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label>Unit/Subject:</label>
+            <input
+              type="text"
+              name="unit"
+              value={form.unit}
+              onChange={handleInputChange}
+              placeholder="e.g., Mathematics, Physics, etc."
+              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+              required
             />
           </div>
-        </div>
-        
-        <div className="cam-group">
-          <label>CAM 2</label>
-          <div className="score-inputs">
-            <input 
-              name="cam2.score" 
-              type="number" 
-              value={form.cam2.score} 
-              onChange={handleChange} 
-              min={0} 
-              className="form-input score-input"
-              placeholder="Score"
-            />
-            <span className="score-separator">/</span>
-            <input 
-              name="cam2.outOf" 
-              type="number" 
-              value={form.cam2.outOf} 
-              onChange={handleChange} 
-              min={1} 
-              className="form-input out-of-input"
-              placeholder="Out of"
-            />
+
+          <div style={{ marginBottom: '1rem' }}>
+            <h4>CAM 1</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label>Score:</label>
+                <input
+                  type="number"
+                  value={form.cam1.score}
+                  onChange={(e) => handleCamChange(1, 'score', e.target.value)}
+                  min="0"
+                  max={form.cam1.outOf}
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                  required
+                />
+              </div>
+              <div>
+                <label>Out of:</label>
+                <input
+                  type="number"
+                  value={form.cam1.outOf}
+                  onChange={(e) => handleCamChange(1, 'outOf', e.target.value)}
+                  min="1"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                  required
+                />
+              </div>
+            </div>
+            <small style={{ color: '#9ca3af' }}>
+              Percentage: {form.cam1.outOf > 0 ? ((form.cam1.score / form.cam1.outOf) * 100).toFixed(1) : 0}%
+            </small>
           </div>
-        </div>
-        
-        <div className="cam-group">
-          <label>CAM 3</label>
-          <div className="score-inputs">
-            <input 
-              name="cam3.score" 
-              type="number" 
-              value={form.cam3.score} 
-              onChange={handleChange} 
-              min={0} 
-              className="form-input score-input"
-              placeholder="Score"
-            />
-            <span className="score-separator">/</span>
-            <input 
-              name="cam3.outOf" 
-              type="number" 
-              value={form.cam3.outOf} 
-              onChange={handleChange} 
-              min={1} 
-              className="form-input out-of-input"
-              placeholder="Out of"
-            />
+
+          <div style={{ marginBottom: '1rem' }}>
+            <h4>CAM 2</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label>Score:</label>
+                <input
+                  type="number"
+                  value={form.cam2.score}
+                  onChange={(e) => handleCamChange(2, 'score', e.target.value)}
+                  min="0"
+                  max={form.cam2.outOf}
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                  required
+                />
+              </div>
+              <div>
+                <label>Out of:</label>
+                <input
+                  type="number"
+                  value={form.cam2.outOf}
+                  onChange={(e) => handleCamChange(2, 'outOf', e.target.value)}
+                  min="1"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                  required
+                />
+              </div>
+            </div>
+            <small style={{ color: '#9ca3af' }}>
+              Percentage: {form.cam2.outOf > 0 ? ((form.cam2.score / form.cam2.outOf) * 100).toFixed(1) : 0}%
+            </small>
           </div>
-        </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <h4>CAM 3</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label>Score:</label>
+                <input
+                  type="number"
+                  value={form.cam3.score}
+                  onChange={(e) => handleCamChange(3, 'score', e.target.value)}
+                  min="0"
+                  max={form.cam3.outOf}
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                  required
+                />
+              </div>
+              <div>
+                <label>Out of:</label>
+                <input
+                  type="number"
+                  value={form.cam3.outOf}
+                  onChange={(e) => handleCamChange(3, 'outOf', e.target.value)}
+                  min="1"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                  required
+                />
+              </div>
+            </div>
+            <small style={{ color: '#9ca3af' }}>
+              Percentage: {form.cam3.outOf > 0 ? ((form.cam3.score / form.cam3.outOf) * 100).toFixed(1) : 0}%
+            </small>
+          </div>
+
+          <div style={{ 
+            background: '#1e3a8a', 
+            padding: '1rem', 
+            borderRadius: '6px', 
+            marginBottom: '1rem',
+            border: '1px solid #3b82f6'
+          }}>
+            <h4 style={{ margin: '0 0 0.5rem 0', color: '#93c5fd' }}>Calculated Average</h4>
+            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#fbbf24' }}>
+              {average.toFixed(1)}%
+            </p>
+            <small style={{ color: '#93c5fd' }}>
+              Based on average of all three CAM percentages
+            </small>
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting || !selectedStudent || !form.unit}
+            style={{
+              background: submitting || !selectedStudent || !form.unit ? '#6b7280' : '#3b82f6',
+              color: '#fff',
+              border: 'none',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '6px',
+              cursor: submitting || !selectedStudent || !form.unit ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              width: '100%'
+            }}
+          >
+            {submitting ? 'Creating Exam Result...' : 'Create Exam Result'}
+          </button>
+        </form>
       </div>
-      
-      <div className="form-group">
-        <label>Average (%)</label>
-        <input 
-          name="average" 
-          value={form.average} 
-          readOnly 
-          className="form-input average-input"
-        />
-      </div>
-      
-      <button type="submit" disabled={loading} className="submit-btn">
-        {loading ? 'Saving...' : 'Save Result'}
-      </button>
-      
-      {selectedStudent && history.length > 0 && (
-        <div className="history-section">
-          <h4>📋 Exam Result History</h4>
-          {loadingHistory ? <p>Loading history...</p> : (
-            <div className="history-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Unit</th>
-                    <th>CAM 1</th>
-                    <th>CAM 2</th>
-                    <th>CAM 3</th>
-                    <th>Average</th>
-                    <th>Changed By</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map(h => (
-                    <tr key={h._id}>
-                      <td>{new Date(h.changedAt).toLocaleString()}</td>
-                      <td>{h.unit}</td>
-                      <td>{h.cam1?.score || 0}/{h.cam1?.outOf || 100}</td>
-                      <td>{h.cam2?.score || 0}/{h.cam2?.outOf || 100}</td>
-                      <td>{h.cam3?.score || 0}/{h.cam3?.outOf || 100}</td>
-                      <td>{h.average}%</td>
-                      <td>{h.changedBy ? `${h.changedBy.firstName} ${h.changedBy.lastName}` : ''}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+      {selectedStudentData && (
+        <div style={{ background: '#374151', padding: '1.5rem', borderRadius: '8px' }}>
+          <h3>Exam History for {selectedStudentData.firstName} {selectedStudentData.lastName}</h3>
+          {studentHistory.length === 0 ? (
+            <p>No exam results found for this student.</p>
+          ) : (
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {studentHistory.map((result) => (
+                <div key={result._id} style={{ background: '#4b5563', padding: '1rem', borderRadius: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <h4 style={{ margin: 0 }}>{result.unit}</h4>
+                    <span style={{ 
+                      background: result.average >= 70 ? '#059669' : result.average >= 50 ? '#d97706' : '#dc2626',
+                      color: '#fff',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      fontSize: '0.875rem'
+                    }}>
+                      {result.average.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', fontSize: '0.875rem' }}>
+                    <div>CAM 1: {result.cam1.score}/{result.cam1.outOf}</div>
+                    <div>CAM 2: {result.cam2.score}/{result.cam2.outOf}</div>
+                    <div>CAM 3: {result.cam3.score}/{result.cam3.outOf}</div>
+                  </div>
+                  <small style={{ color: '#9ca3af' }}>
+                    {new Date(result.createdAt).toLocaleDateString()}
+                  </small>
+                </div>
+              ))}
             </div>
           )}
         </div>
       )}
-    </form>
+    </div>
   );
 };
 

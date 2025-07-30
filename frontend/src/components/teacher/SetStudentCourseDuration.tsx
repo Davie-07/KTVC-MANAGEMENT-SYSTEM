@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Student {
   _id: string;
@@ -19,7 +20,7 @@ const SetStudentCourseDuration: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState('');
   const [courseDuration, setCourseDuration] = useState('');
-  const [updating, setUpdating] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -30,7 +31,7 @@ const SetStudentCourseDuration: React.FC = () => {
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/auth/students/course/${encodeURIComponent(user.course)}`, {
+        const response = await fetch(`${API_ENDPOINTS.STUDENTS_BY_COURSE}/${encodeURIComponent(user.course)}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -64,15 +65,15 @@ const SetStudentCourseDuration: React.FC = () => {
     }
 
     try {
-      setUpdating(true);
+      setSubmitting(true);
       setError(null);
       setSuccess(null);
 
-      const response = await fetch(`http://localhost:5000/api/auth/student/${selectedStudent}/course-duration`, {
+      const response = await fetch(`${API_ENDPOINTS.AUTH_STUDENT_COURSE_DURATION}/${selectedStudent}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ courseDuration })
       });
@@ -98,7 +99,7 @@ const SetStudentCourseDuration: React.FC = () => {
       console.error('Error updating course duration:', error);
       setError('Network error occurred');
     } finally {
-      setUpdating(false);
+      setSubmitting(false);
     }
   };
 
@@ -216,19 +217,19 @@ const SetStudentCourseDuration: React.FC = () => {
 
           <button
             type="submit"
-            disabled={updating || !selectedStudent || !courseDuration}
+            disabled={submitting || !selectedStudent || !courseDuration}
             style={{
-              background: updating ? '#6b7280' : '#3b82f6',
+              background: submitting ? '#6b7280' : '#3b82f6',
               color: '#fff',
               border: 'none',
               borderRadius: 6,
               padding: '0.7rem 1.5rem',
               fontWeight: 600,
-              cursor: updating ? 'not-allowed' : 'pointer',
-              opacity: updating || !selectedStudent || !courseDuration ? 0.6 : 1
+              cursor: submitting ? 'not-allowed' : 'pointer',
+              opacity: submitting || !selectedStudent || !courseDuration ? 0.6 : 1
             }}
           >
-            {updating ? 'Updating...' : 'Set Course Duration'}
+            {submitting ? 'Updating...' : 'Set Course Duration'}
           </button>
         </form>
       )}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface ClassItem {
   _id: string;
@@ -23,15 +24,21 @@ const ClassManagementList: React.FC = () => {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [publishing, setPublishing] = useState<string | null>(null);
 
-  const fetchClasses = () => {
-    setLoading(true);
-    fetch('http://localhost:5000/api/class', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => setClasses(Array.isArray(data) ? data : []))
-      .catch(() => setClasses([]))
-      .finally(() => setLoading(false));
+  const fetchClasses = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(API_ENDPOINTS.CLASSES, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setClasses(data);
+      }
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -59,17 +66,24 @@ const ClassManagementList: React.FC = () => {
   const saveEdit = async () => {
     if (!editId) return;
     setSaving(true);
-    await fetch(`http://localhost:5000/api/class/${editId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        ...editForm,
-        students: editForm.students.split(',').map((s: string) => s.trim())
-      })
-    });
-    setEditId(null);
-    setSaving(false);
-    fetchClasses();
+    try {
+      const response = await fetch(`${API_ENDPOINTS.CLASSES}/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          ...editForm,
+          students: editForm.students.split(',').map((s: string) => s.trim())
+        })
+      });
+      if (response.ok) {
+        setEditId(null);
+        fetchClasses();
+      }
+    } catch (error) {
+      console.error('Error saving class:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const cancelEdit = () => setEditId(null);
@@ -77,23 +91,35 @@ const ClassManagementList: React.FC = () => {
   const deleteClass = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this class?')) return;
     setDeleting(id);
-    await fetch(`http://localhost:5000/api/class/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setDeleting(null);
-    fetchClasses();
+    try {
+      const response = await fetch(`${API_ENDPOINTS.CLASSES}/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        setDeleting(null);
+        fetchClasses();
+      }
+    } catch (error) {
+      console.error('Error deleting class:', error);
+    }
   };
 
   const togglePublish = async (id: string, published: boolean) => {
     setPublishing(id);
-    await fetch(`http://localhost:5000/api/class/${id}/publish`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ published: !published })
-    });
-    setPublishing(null);
-    fetchClasses();
+    try {
+      const response = await fetch(`${API_ENDPOINTS.CLASSES}/${id}/publish`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ published: !published })
+      });
+      if (response.ok) {
+        setPublishing(null);
+        fetchClasses();
+      }
+    } catch (error) {
+      console.error('Error publishing class:', error);
+    }
   };
 
   return (

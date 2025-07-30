@@ -1840,162 +1840,105 @@ canvas, svg {
 
 /* Notification Panel Styling */
 .notification-panel {
-  position: relative;
-  display: inline-block;
-}
-
-.notification-bell {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  position: relative;
-  padding: 0.5rem;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  color: #fff;
-}
-
-.notification-bell:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: scale(1.1);
-}
-
-.notification-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: #ef4444;
-  color: #fff;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  font-size: 0.7rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-
-.notification-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 350px;
-  max-height: 400px;
-  background: #23232b;
-  border: 1px solid #374151;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
-  overflow: hidden;
-  margin-top: 0.5rem;
+  background: #1f2937;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
 }
 
 .notification-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
   border-bottom: 1px solid #374151;
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .notification-header h3 {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
+  color: #f9fafb;
 }
 
 .mark-all-read {
-  background: #22c55e;
-  color: #fff;
+  background: #3b82f6;
+  color: white;
   border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  font-size: 0.875rem;
 }
 
 .mark-all-read:hover {
-  background: #16a34a;
+  background: #2563eb;
 }
 
 .notification-list {
-  max-height: 300px;
+  max-height: 400px;
   overflow-y: auto;
 }
 
-.notification-list::-webkit-scrollbar {
-  width: 4px;
-}
-
-.notification-list::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.notification-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-}
-
 .notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   padding: 1rem;
-  border-bottom: 1px solid #374151;
+  margin-bottom: 0.5rem;
+  background: #374151;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
+  transition: background-color 0.2s;
 }
 
 .notification-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: #4b5563;
 }
 
 .notification-item.unread {
-  background: rgba(59, 130, 246, 0.1);
-  border-left: 3px solid #3b82f6;
+  border-left: 4px solid #3b82f6;
+  background: #1e3a8a;
 }
 
-.notification-item.unread:hover {
-  background: rgba(59, 130, 246, 0.15);
+.notification-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: #f9fafb;
+  font-size: 1rem;
 }
 
 .notification-content p {
   margin: 0 0 0.5rem 0;
-  color: #fff;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  color: #d1d5db;
+  font-size: 0.875rem;
 }
 
 .notification-content small {
   color: #9ca3af;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
-.unread-indicator {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 8px;
-  height: 8px;
-  background: #3b82f6;
+.notification-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.delete-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
   border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
 }
 
-.loading, .no-notifications {
-  padding: 2rem;
-  text-align: center;
-  color: #9ca3af;
-  font-style: italic;
+.delete-btn:hover {
+  background: #b91c1c;
 }
 
 /* Responsive adjustments for notifications */

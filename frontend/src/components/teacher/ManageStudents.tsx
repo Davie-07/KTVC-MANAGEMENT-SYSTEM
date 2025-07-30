@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Student {
   _id: string;
@@ -45,19 +45,15 @@ const ManageStudents: React.FC = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      if (!user?.course) {
-        setError('No course assigned to teacher');
-        return;
-      }
-      
-      const response = await axios.get(`http://localhost:5000/api/auth/students/course/${encodeURIComponent(user.course)}`, {
+      const response = await fetch(`${API_ENDPOINTS.STUDENTS_BY_COURSE}/${encodeURIComponent(user?.course || '')}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setStudents(response.data);
-      setError('');
-    } catch (err: any) {
-      console.error('Error fetching students:', err);
-      setError(err.response?.data?.message || 'Failed to fetch students');
+      if (response.ok) {
+        const data = await response.json();
+        setStudents(data);
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
     } finally {
       setLoading(false);
     }
@@ -65,12 +61,15 @@ const ManageStudents: React.FC = () => {
 
   const fetchClasses = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/class', {
+      const response = await fetch(API_ENDPOINTS.CLASSES, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setClasses(response.data);
-    } catch (err) {
-      console.error('Error fetching classes:', err);
+      if (response.ok) {
+        const data = await response.json();
+        setClasses(data);
+      }
+    } catch (error) {
+      console.error('Error fetching classes:', error);
     }
   };
 
@@ -90,33 +89,26 @@ const ManageStudents: React.FC = () => {
     }
   };
 
-  const handleAssignToClass = async () => {
-    if (!selectedClass || selectedStudents.length === 0) {
-      setError('Please select a class and at least one student');
-      return;
-    }
-
+  const assignToClass = async (studentId: string, classId: string) => {
     try {
-      setError('');
-      setSuccess('');
-      
-      const response = await axios.post('http://localhost:5000/api/class/assign-students', {
-        classId: selectedClass,
-        studentIds: selectedStudents
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(API_ENDPOINTS.CLASSES_ASSIGN_STUDENTS, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ studentId, classId })
       });
-
-      if (response.status === 200) {
-        setSuccess(`Successfully assigned ${selectedStudents.length} student(s) to class`);
-        setSelectedStudents([]);
-        setSelectedClass('');
-        setShowAssignmentModal(false);
-        fetchStudents(); // Refresh to show updated assignments
+      
+      if (response.ok) {
+        fetchStudents();
+        setSuccess('Student assigned to class successfully!');
+      } else {
+        setError('Failed to assign student to class');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to assign students to class');
-      console.error('Error assigning students:', err);
+    } catch (error) {
+      setError('Error assigning student to class');
+      console.error('Error:', error);
     }
   };
 
@@ -305,15 +297,20 @@ const ManageStudents: React.FC = () => {
                   Cancel
                 </button>
                 <button 
-                  onClick={handleAssignToClass}
-                  disabled={!selectedClass}
+                  onClick={() => {
+                    if (selectedStudents.length > 0 && selectedClass) {
+                      assignToClass(selectedStudents[0], selectedClass); // Assuming only one student is selected for now
+                      setShowAssignmentModal(false);
+                    }
+                  }}
+                  disabled={!selectedClass || selectedStudents.length === 0}
                   style={{
                     padding: '0.75rem 1.5rem',
-                    background: !selectedClass ? '#6b7280' : '#2563eb',
+                    background: !selectedClass || selectedStudents.length === 0 ? '#6b7280' : '#2563eb',
                     color: '#fff',
                     border: 'none',
                     borderRadius: '8px',
-                    cursor: !selectedClass ? 'not-allowed' : 'pointer',
+                    cursor: !selectedClass || selectedStudents.length === 0 ? 'not-allowed' : 'pointer',
                     fontSize: '1rem',
                     fontWeight: '600'
                   }}

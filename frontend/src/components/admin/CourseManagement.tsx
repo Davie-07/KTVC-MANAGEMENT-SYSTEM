@@ -87,7 +87,7 @@ const CourseManagement: React.FC = () => {
         const res = await fetch(API_ENDPOINTS.COURSES, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify(form),
+          body: JSON.stringify({ ...form, published: true }),
         });
         if (!res.ok) throw new Error('Failed to create course');
         const created = await res.json();

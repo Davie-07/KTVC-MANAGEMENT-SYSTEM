@@ -4,33 +4,47 @@ import User from '../models/User';
 
 export interface AuthRequest extends Request {
   user?: any;
-  body?: any;
-  params?: any;
-  headers?: any;
 }
 
 export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'No token provided.' });
-  }
-  const token = authHeader.split(' ')[1];
   try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(401).json({ message: 'User not found.' });
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
+    const user = await User.findById(decoded.userId);
+    
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid token.' });
+    }
+
     req.user = user;
     next();
-  } catch (err) {
-    return res.status(401).json({ message: 'Invalid token.' });
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token.' });
   }
 };
 
 export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Admin access required.' });
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied. Admin role required.' });
+  }
+  next();
+};
+
+export const requireTeacher = (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (req.user?.role !== 'teacher' && req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied. Teacher role required.' });
+  }
+  next();
+};
+
+export const requireStudent = (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (req.user?.role !== 'student' && req.user?.role !== 'teacher' && req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied. Student role required.' });
   }
   next();
 }; 

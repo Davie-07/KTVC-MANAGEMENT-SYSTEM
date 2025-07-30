@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface AcademicCalendar {
   _id: string;
@@ -12,6 +14,7 @@ interface AcademicCalendar {
 }
 
 const AcademicCalendarManagement: React.FC = () => {
+  const { token } = useAuth();
   const [calendars, setCalendars] = useState<AcademicCalendar[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,39 +28,54 @@ const AcademicCalendarManagement: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchCalendars();
-  }, []);
-
-  const fetchCalendars = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost:5000/api/academic-calendar', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const fetchCalendars = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(API_ENDPOINTS.ACADEMIC_CALENDAR, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setCalendars(data);
         }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCalendars(data);
+      } catch (error) {
+        console.error('Error fetching calendars:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      setError('Failed to fetch academic calendars');
-    } finally {
-      setLoading(false);
+    };
+    
+    if (token) {
+      fetchCalendars();
     }
+  }, [token]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'feeAmount' ? parseFloat(value) || 0 : value
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-
+    
+    if (!formData.startDate || !formData.endDate) {
+      setError('Please fill in all required fields');
+      return;
+    }
+    
     try {
+      setSubmitting(true);
       const url = editingId 
-        ? `http://localhost:5000/api/academic-calendar/${editingId}`
-        : 'http://localhost:5000/api/academic-calendar';
+        ? `${API_ENDPOINTS.ACADEMIC_CALENDAR}/${editingId}`
+        : API_ENDPOINTS.ACADEMIC_CALENDAR;
       
       const method = editingId ? 'PUT' : 'POST';
       
@@ -65,13 +83,18 @@ const AcademicCalendarManagement: React.FC = () => {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(formData)
       });
-
+      
       if (response.ok) {
-        setSuccess(editingId ? 'Academic calendar updated successfully' : 'Academic calendar created successfully');
+        const saved = await response.json();
+        if (editingId) {
+          setCalendars(prev => prev.map(c => c._id === editingId ? saved : c));
+        } else {
+          setCalendars(prev => [...prev, saved]);
+        }
         setFormData({
           year: new Date().getFullYear(),
           semester: 'Term 1',
@@ -81,13 +104,16 @@ const AcademicCalendarManagement: React.FC = () => {
           currency: 'KSH',
         });
         setEditingId(null);
-        fetchCalendars();
+        setSuccess(editingId ? 'Calendar updated successfully!' : 'Calendar created successfully!');
       } else {
         const data = await response.json();
-        setError(data.message || 'Failed to save academic calendar');
+        setError(data.message || 'Failed to save calendar');
       }
     } catch (error) {
-      setError('Failed to save academic calendar');
+      setError('Error saving calendar');
+      console.error('Error:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -104,24 +130,23 @@ const AcademicCalendarManagement: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this academic calendar?')) return;
-
+    if (!window.confirm('Are you sure you want to delete this calendar?')) return;
+    
     try {
-      const response = await fetch(`http://localhost:5000/api/academic-calendar/${id}`, {
+      const response = await fetch(`${API_ENDPOINTS.ACADEMIC_CALENDAR}/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-
+      
       if (response.ok) {
-        setSuccess('Academic calendar deleted successfully');
-        fetchCalendars();
+        setCalendars(prev => prev.filter(c => c._id !== id));
+        setSuccess('Calendar deleted successfully!');
       } else {
-        setError('Failed to delete academic calendar');
+        setError('Failed to delete calendar');
       }
     } catch (error) {
-      setError('Failed to delete academic calendar');
+      setError('Error deleting calendar');
+      console.error('Error:', error);
     }
   };
 
@@ -136,144 +161,222 @@ const AcademicCalendarManagement: React.FC = () => {
     });
     setEditingId(null);
     setError(null);
+    setSuccess(null);
   };
 
+  if (loading) {
+    return <div style={{ color: '#fff', textAlign: 'center', padding: '2rem' }}>Loading calendars...</div>;
+  }
+
   return (
-    <div className="card">
+    <div style={{ color: '#fff', padding: '1rem' }}>
       <h2>Academic Calendar Management</h2>
       
-      {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
+      {error && (
+        <div style={{ background: '#dc2626', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem' }}>
+          {error}
+        </div>
+      )}
+      
+      {success && (
+        <div style={{ background: '#059669', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem' }}>
+          {success}
+        </div>
+      )}
 
-      <form onSubmit={handleSubmit} className="form">
-        <div className="form-row">
-          <div className="form-group">
-            <label>Year:</label>
-            <input
-              type="number"
-              value={formData.year}
-              onChange={(e) => setFormData({...formData, year: parseInt(e.target.value)})}
-              min={new Date().getFullYear()}
-              required
-            />
+      <div style={{ background: '#374151', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem' }}>
+        <h3>{editingId ? 'Edit Calendar' : 'Create New Calendar'}</h3>
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label>Year:</label>
+              <input
+                type="number"
+                name="year"
+                value={formData.year}
+                onChange={handleInputChange}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                required
+              />
+            </div>
+            <div>
+              <label>Semester:</label>
+              <select
+                name="semester"
+                value={formData.semester}
+                onChange={handleInputChange}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                required
+              >
+                <option value="Term 1">Term 1</option>
+                <option value="Term 2">Term 2</option>
+                <option value="Term 3">Term 3</option>
+                <option value="Holiday">Holiday</option>
+              </select>
+            </div>
           </div>
-          <div className="form-group">
-            <label>Semester:</label>
-            <select
-              value={formData.semester}
-              onChange={(e) => setFormData({...formData, semester: e.target.value})}
-              required
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label>Start Date:</label>
+              <input
+                type="date"
+                name="startDate"
+                value={formData.startDate}
+                onChange={handleInputChange}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                required
+              />
+            </div>
+            <div>
+              <label>End Date:</label>
+              <input
+                type="date"
+                name="endDate"
+                value={formData.endDate}
+                onChange={handleInputChange}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                required
+              />
+            </div>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label>Fee Amount:</label>
+              <input
+                type="number"
+                name="feeAmount"
+                value={formData.feeAmount}
+                onChange={handleInputChange}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+            <div>
+              <label>Currency:</label>
+              <select
+                name="currency"
+                value={formData.currency}
+                onChange={handleInputChange}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                required
+              >
+                <option value="KSH">KSH</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+              </select>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button
+              type="submit"
+              disabled={submitting}
+              style={{
+                background: submitting ? '#6b7280' : '#3b82f6',
+                color: '#fff',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '6px',
+                cursor: submitting ? 'not-allowed' : 'pointer',
+                fontWeight: 600
+              }}
             >
-              <option value="Term 1">Term 1</option>
-              <option value="Term 2">Term 2</option>
-              <option value="Term 3">Term 3</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>Start Date:</label>
-            <input
-              type="date"
-              value={formData.startDate}
-              onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>End Date:</label>
-            <input
-              type="date"
-              value={formData.endDate}
-              onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>Fee Amount:</label>
-            <input
-              type="number"
-              value={formData.feeAmount}
-              onChange={(e) => setFormData({...formData, feeAmount: parseInt(e.target.value)})}
-              min="0"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Currency:</label>
-            <select
-              value={formData.currency}
-              onChange={(e) => setFormData({...formData, currency: e.target.value})}
-            >
-              <option value="KSH">KSH</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="form-actions">
-          <button type="submit" className="btn-primary">
-            {editingId ? 'Update Calendar' : 'Create Calendar'}
-          </button>
-          {editingId && (
-            <button type="button" onClick={handleCancel} className="btn-secondary">
-              Cancel
+              {submitting ? 'Saving...' : (editingId ? 'Update Calendar' : 'Create Calendar')}
             </button>
-          )}
-        </div>
-      </form>
+            {editingId && (
+              <button
+                type="button"
+                onClick={handleCancel}
+                style={{
+                  background: '#6b7280',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
 
-      <div className="table-container">
+      <div>
         <h3>Academic Calendars</h3>
-        {loading ? (
-          <div className="loading">Loading calendars...</div>
+        {calendars.length === 0 ? (
+          <p>No calendars found. Create one above.</p>
         ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Year</th>
-                <th>Semester</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Fee Amount</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {calendars.map(calendar => (
-                <tr key={calendar._id}>
-                  <td>{calendar.year}</td>
-                  <td>{calendar.semester}</td>
-                  <td>{new Date(calendar.startDate).toLocaleDateString()}</td>
-                  <td>{new Date(calendar.endDate).toLocaleDateString()}</td>
-                  <td>{calendar.feeAmount} {calendar.currency}</td>
-                  <td>
-                    <span className={`status ${calendar.isActive ? 'active' : 'inactive'}`}>
-                      {calendar.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td>
-                    <button onClick={() => handleEdit(calendar)} className="btn-edit">
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {calendars.map(calendar => (
+              <div
+                key={calendar._id}
+                style={{
+                  background: '#374151',
+                  padding: '1rem',
+                  borderRadius: '6px',
+                  border: calendar.isActive ? '2px solid #059669' : '1px solid #4b5563'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                  <h4 style={{ margin: 0 }}>
+                    {calendar.year} - {calendar.semester}
+                    {calendar.isActive && (
+                      <span style={{ background: '#059669', color: '#fff', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', marginLeft: '0.5rem' }}>
+                        Active
+                      </span>
+                    )}
+                  </h4>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={() => handleEdit(calendar)}
+                      style={{
+                        background: '#3b82f6',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem'
+                      }}
+                    >
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(calendar._id)} className="btn-delete">
+                    <button
+                      onClick={() => handleDelete(calendar._id)}
+                      style={{
+                        background: '#dc2626',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem'
+                      }}
+                    >
                       Delete
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+                <p style={{ margin: '0.5rem 0', color: '#d1d5db' }}>
+                  <strong>Period:</strong> {new Date(calendar.startDate).toLocaleDateString()} - {new Date(calendar.endDate).toLocaleDateString()}
+                </p>
+                <p style={{ margin: '0.5rem 0', color: '#d1d5db' }}>
+                  <strong>Fee:</strong> {calendar.feeAmount} {calendar.currency}
+                </p>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
   );
 };
 
-export default AcademicCalendarManagement; 
+export default AcademicCalendarManagement;
