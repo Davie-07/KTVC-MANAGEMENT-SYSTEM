@@ -96,6 +96,7 @@ export const API_ENDPOINTS = {
   SYSTEM_STATUS: `${API_BASE_URL}/api/system/status`,
   SYSTEM_SETTINGS: `${API_BASE_URL}/api/system/settings`,
   SYSTEM_BACKUP: `${API_BASE_URL}/api/system/backup`,
+  SYSTEM_GROWTH_DATA: `${API_BASE_URL}/api/system/growth-data`,
   
   // Auth Management
   AUTH_BULK_ACTION: `${API_BASE_URL}/api/auth/bulk-action`

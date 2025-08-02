@@ -40,27 +40,33 @@ const GrowthCharts: React.FC = () => {
           setGrowthData(data);
         } else {
           // Fallback to empty array if endpoint doesn't exist yet
+          console.warn('Growth data endpoint not available, using fallback');
           setGrowthData([]);
         }
 
         // Fetch real student progress data if user is a student
         if (user?.role === 'student') {
-          const progressResponse = await fetch(`${API_ENDPOINTS.EXAM_RESULTS}/student/${user.id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          
-          if (progressResponse.ok) {
-            const progressData = await progressResponse.json();
-            // Transform the data to match our interface
-            const transformedProgress = progressData.map((result: any) => ({
-              unit: result.unit,
-              cam1: result.cam1 || { score: 0, outOf: 100 },
-              cam2: result.cam2 || { score: 0, outOf: 100 },
-              average: result.average || 0,
-              target: 70 // Default target
-            }));
-            setStudentProgress(transformedProgress);
-          } else {
+          try {
+            const progressResponse = await fetch(`${API_ENDPOINTS.EXAM_RESULTS}/student/${user.id}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            if (progressResponse.ok) {
+              const progressData = await progressResponse.json();
+              // Transform the data to match our interface
+              const transformedProgress = progressData.map((result: any) => ({
+                unit: result.unit,
+                cam1: result.cam1 || { score: 0, outOf: 100 },
+                cam2: result.cam2 || { score: 0, outOf: 100 },
+                average: result.average || 0,
+                target: 70 // Default target
+              }));
+              setStudentProgress(transformedProgress);
+            } else {
+              setStudentProgress([]);
+            }
+          } catch (progressError) {
+            console.error('Error fetching student progress:', progressError);
             setStudentProgress([]);
           }
         } else {
