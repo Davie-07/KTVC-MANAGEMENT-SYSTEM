@@ -22,7 +22,7 @@ function getGreeting() {
 const GreetingCard: React.FC = () => {
   const { user, token } = useAuth();
   const greeting = getGreeting();
-  const name = user ? user.firstName : 'Student';
+  const name = user?.firstName || 'Student';
   const quote = quotes[new Date().getDay() % quotes.length];
 
   const [todaysClasses, setTodaysClasses] = useState<number | null>(null);

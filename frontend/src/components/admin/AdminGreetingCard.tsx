@@ -11,7 +11,7 @@ function getGreeting() {
 const AdminGreetingCard: React.FC = () => {
   const { user } = useAuth();
   const greeting = getGreeting();
-  const name = user ? user.firstName : 'Admin';
+  const name = user?.firstName || 'Admin';
 
   return (
     <div style={{

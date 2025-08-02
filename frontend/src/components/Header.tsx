@@ -31,7 +31,7 @@ const Header: React.FC = () => {
         {isTeacher && <TeacherNotificationPanel />}
         {isStudent && <StudentNotificationPanel />}
         <span className="account-icon">👤</span>
-        <span className="account-name">{user ? user.firstName : 'Account'}</span>
+        <span className="account-name">{user?.firstName || 'Account'}</span>
         {user && (
           <button className="logout-btn" onClick={logout} style={{marginLeft:'1rem'}}>Logout</button>
         )}

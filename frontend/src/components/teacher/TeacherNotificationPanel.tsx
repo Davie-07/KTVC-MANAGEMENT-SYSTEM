@@ -20,11 +20,11 @@ const TeacherNotificationPanel: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || !user?.id) return;
     
     const fetchNotifications = async () => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}/teacher/${user?.id}`, {
+        const response = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}/teacher/${user.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         

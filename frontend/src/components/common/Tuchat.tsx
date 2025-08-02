@@ -289,11 +289,11 @@ const Tuchat: React.FC = () => {
                       onClick={() => handleUserSelect(user)}
                     >
                       <div className="user-avatar">
-                        {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                        {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                         <div className={`online-status ${user.isOnline ? 'online' : 'offline'}`}></div>
                       </div>
                       <div className="user-info">
-                        <div className="user-name">{user.firstName} {user.lastName}</div>
+                        <div className="user-name">{user?.firstName} {user?.lastName}</div>
                         <div className="user-course">{user.course}</div>
                         <div className="user-role">{user.role}</div>
                         <div className="friend-status">
@@ -314,11 +314,11 @@ const Tuchat: React.FC = () => {
                       onClick={() => handleUserSelect(user)}
                     >
                       <div className="user-avatar">
-                        {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                        {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                         <div className={`online-status ${user.isOnline ? 'online' : 'offline'}`}></div>
                       </div>
                       <div className="conversation-info">
-                        <div className="user-name">{user.firstName} {user.lastName}</div>
+                        <div className="user-name">{user?.firstName} {user?.lastName}</div>
                         <div className="last-message">
                           {user.lastMessage ? (
                             <>
@@ -351,11 +351,11 @@ const Tuchat: React.FC = () => {
               <div className="chat-header">
                 <div className="selected-user-info">
                   <div className="user-avatar">
-                    {selectedUser.firstName.charAt(0)}{selectedUser.lastName.charAt(0)}
+                    {selectedUser?.firstName?.charAt(0)}{selectedUser?.lastName?.charAt(0)}
                     <div className={`online-status ${selectedUser.isOnline ? 'online' : 'offline'}`}></div>
                   </div>
                   <div>
-                    <div className="user-name">{selectedUser.firstName} {selectedUser.lastName}</div>
+                    <div className="user-name">{selectedUser?.firstName} {selectedUser?.lastName}</div>
                     <div className="user-status">
                       {selectedUser.isOnline ? '🟢 Online' : '🔴 Offline'}
                     </div>
