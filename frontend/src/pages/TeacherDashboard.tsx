@@ -27,11 +27,30 @@ interface TeacherDashboardProps {
 }
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ activeTab, onTabChange }) => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const userRole = user?.role || 'teacher';
 
   // Add error boundary
   const [hasError, setHasError] = useState(false);
+
+  // Add loading state to ensure user is loaded
+  if (!user || !token) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '50vh',
+        color: '#fff',
+        textAlign: 'center'
+      }}>
+        <div>
+          <h3>Loading...</h3>
+          <p>Please wait while we load your dashboard.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (hasError) {
     return (

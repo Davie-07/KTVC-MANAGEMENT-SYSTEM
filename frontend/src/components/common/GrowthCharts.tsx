@@ -31,7 +31,7 @@ const GrowthCharts: React.FC = () => {
         setLoading(true);
         
         // Fetch real growth data from the backend
-        const response = await fetch(`${API_ENDPOINTS.SYSTEM}/growth-data`, {
+        const response = await fetch(API_ENDPOINTS.SYSTEM_GROWTH_DATA, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -45,7 +45,7 @@ const GrowthCharts: React.FC = () => {
         }
 
         // Fetch real student progress data if user is a student
-        if (user?.role === 'student') {
+        if (user?.role === 'student' && user?.id) {
           try {
             const progressResponse = await fetch(`${API_ENDPOINTS.EXAM_RESULTS}/student/${user.id}`, {
               headers: { Authorization: `Bearer ${token}` }
@@ -84,6 +84,8 @@ const GrowthCharts: React.FC = () => {
 
     if (token) {
       fetchGrowthData();
+    } else {
+      setLoading(false);
     }
   }, [token, user]);
 

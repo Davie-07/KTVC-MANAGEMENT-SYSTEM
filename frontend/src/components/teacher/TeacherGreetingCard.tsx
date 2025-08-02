@@ -22,7 +22,7 @@ function getGreeting() {
 const TeacherGreetingCard: React.FC = () => {
   const { user, token } = useAuth();
   const greeting = getGreeting();
-  const name = user ? user.firstName : 'Teacher';
+  const name = user?.firstName || 'Teacher';
   const quote = quotes[new Date().getDay() % quotes.length];
 
   const [classesToday, setClassesToday] = useState<number | null>(null);
@@ -30,7 +30,10 @@ const TeacherGreetingCard: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!user || !token) return;
+    if (!user || !token || !user.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     
     // Fetch today's classes
