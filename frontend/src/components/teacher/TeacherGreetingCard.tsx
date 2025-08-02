@@ -30,25 +30,37 @@ const TeacherGreetingCard: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !token) return;
     setLoading(true);
     
     // Fetch today's classes
     fetch(`${API_ENDPOINTS.CLASSES}/teacher-today/${user.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch classes');
+        return res.json();
+      })
       .then(data => setClassesToday(Array.isArray(data) ? data.length : 0))
-      .catch(() => setClassesToday(0));
+      .catch((error) => {
+        console.error('Error fetching classes:', error);
+        setClassesToday(0);
+      });
 
     // Fetch student count for teacher's course
     if (user.course) {
-      fetch(`${API_ENDPOINTS.STUDENTS}/course/${encodeURIComponent(user.course)}`, {
+      fetch(`${API_ENDPOINTS.STUDENTS_BY_COURSE}/${encodeURIComponent(user.course)}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch students');
+          return res.json();
+        })
         .then(data => setStudentsCount(Array.isArray(data) ? data.length : 0))
-        .catch(() => setStudentsCount(0))
+        .catch((error) => {
+          console.error('Error fetching students:', error);
+          setStudentsCount(0);
+        })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
