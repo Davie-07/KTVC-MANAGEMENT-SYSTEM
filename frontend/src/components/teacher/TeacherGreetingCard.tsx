@@ -56,16 +56,24 @@ const TeacherGreetingCard: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => {
-          if (!res.ok) throw new Error('Failed to fetch students');
+          if (!res.ok) {
+            console.error('Failed to fetch students:', res.status, res.statusText);
+            throw new Error(`Failed to fetch students: ${res.status}`);
+          }
           return res.json();
         })
-        .then(data => setStudentsCount(Array.isArray(data) ? data.length : 0))
+        .then(data => {
+          console.log('Students data:', data);
+          setStudentsCount(Array.isArray(data) ? data.length : 0);
+        })
         .catch((error) => {
           console.error('Error fetching students:', error);
           setStudentsCount(0);
         })
         .finally(() => setLoading(false));
     } else {
+      console.log('No course assigned to teacher');
+      setStudentsCount(0);
       setLoading(false);
     }
   }, [user, token]);

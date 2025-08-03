@@ -409,6 +409,9 @@ router.get('/students/course/:course', authenticate, async (req: AuthRequest, re
   try {
     const { course } = req.params;
     
+    console.log('Fetching students for course:', course);
+    console.log('Request user:', req.user?.id, req.user?.role);
+    
     if (!course) {
       return res.status(400).json({ message: 'Course parameter is required.' });
     }
@@ -418,8 +421,10 @@ router.get('/students/course/:course', authenticate, async (req: AuthRequest, re
       course: course 
     }, 'firstName lastName email phone course level admission');
     
+    console.log('Found students:', students.length);
     res.json(students);
   } catch (err) {
+    console.error('Error fetching students by course:', err);
     res.status(500).json({ message: 'Failed to fetch students by course.', error: err });
   }
 });
