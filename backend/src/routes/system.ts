@@ -26,30 +26,18 @@ router.get('/status', authenticate, requireAdmin, async (req, res) => {
 router.get('/growth-data', authenticate, async (req, res) => {
   try {
     // Mock growth data - in real app, calculate from actual data
-    const growthData = {
-      studentGrowth: [
-        { month: 'Jan', count: 120 },
-        { month: 'Feb', count: 135 },
-        { month: 'Mar', count: 142 },
-        { month: 'Apr', count: 158 },
-        { month: 'May', count: 165 },
-        { month: 'Jun', count: 172 }
-      ],
-      courseEnrollment: [
-        { course: 'ICT', count: 45 },
-        { course: 'Engineering', count: 38 },
-        { course: 'Business', count: 32 },
-        { course: 'Science', count: 28 }
-      ],
-      performanceMetrics: {
-        averageScore: 78.5,
-        passRate: 92.3,
-        attendanceRate: 88.7
-      }
-    };
+    const growthData = [
+      { month: 'Jan', students: 120, teachers: 15, courses: 8, classes: 45 },
+      { month: 'Feb', students: 135, teachers: 18, courses: 10, classes: 52 },
+      { month: 'Mar', students: 142, teachers: 20, courses: 12, classes: 58 },
+      { month: 'Apr', students: 158, teachers: 22, courses: 14, classes: 65 },
+      { month: 'May', students: 165, teachers: 25, courses: 16, classes: 72 },
+      { month: 'Jun', students: 172, teachers: 28, courses: 18, classes: 80 }
+    ];
     
     res.json(growthData);
   } catch (error) {
+    console.error('Error in growth-data endpoint:', error);
     res.status(500).json({ message: 'Failed to fetch growth data' });
   }
 });

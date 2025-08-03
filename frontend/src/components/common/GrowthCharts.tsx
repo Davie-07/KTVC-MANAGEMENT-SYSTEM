@@ -30,6 +30,12 @@ const GrowthCharts: React.FC = () => {
       try {
         setLoading(true);
         
+        // Only fetch if we have a valid token and user
+        if (!token || !user?.id) {
+          setLoading(false);
+          return;
+        }
+        
         // Fetch real growth data from the backend
         const response = await fetch(API_ENDPOINTS.SYSTEM_GROWTH_DATA, {
           headers: { Authorization: `Bearer ${token}` }
@@ -82,11 +88,7 @@ const GrowthCharts: React.FC = () => {
       }
     };
 
-    if (token) {
-      fetchGrowthData();
-    } else {
-      setLoading(false);
-    }
+    fetchGrowthData();
   }, [token, user]);
 
   const renderGrowthChart = () => {
