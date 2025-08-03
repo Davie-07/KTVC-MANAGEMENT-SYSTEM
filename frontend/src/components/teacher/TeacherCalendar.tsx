@@ -166,7 +166,7 @@ const TeacherCalendar: React.FC = () => {
           eventPropGetter={() => ({ style: { background: '#2563eb', color: '#fff', borderRadius: 6 } })}
           views={['month', 'week', 'day', 'agenda']}
           popup
-          tooltipAccessor={event => `${event.title}\nStudents: ${event.students.map((s: any) => s.firstName + ' ' + s.lastName).join(', ')}`}
+          tooltipAccessor={event => `${event.title}\nStudents: ${event.students.map((s: any) => (s?.firstName || 'Unknown') + ' ' + (s?.lastName || 'Student')).join(', ')}`}
           onSelectEvent={onSelectEvent}
           selectable
           onSelectSlot={onSelectSlot}
@@ -203,7 +203,7 @@ const TeacherCalendar: React.FC = () => {
               <label>Students<br/>
                 <select name="students" multiple value={form.students} onChange={handleFormChange} style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff',minHeight:80}}>
                   {students.map(s => (
-                    <option key={s._id} value={s._id}>{s.firstName} {s.lastName} ({s.email})</option>
+                    <option key={s._id} value={s._id}>{s?.firstName || 'Unknown'} {s?.lastName || 'Student'} ({s?.email || 'No email'})</option>
                   ))}
                 </select>
               </label>
@@ -246,7 +246,7 @@ const TeacherCalendar: React.FC = () => {
               <label>Students<br/>
                 <select name="students" multiple value={createForm.students} onChange={handleCreateFormChange} style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff',minHeight:80}}>
                   {students.map(s => (
-                    <option key={s._id} value={s._id}>{s.firstName} {s.lastName} ({s.email})</option>
+                    <option key={s._id} value={s._id}>{s?.firstName || 'Unknown'} {s?.lastName || 'Student'} ({s?.email || 'No email'})</option>
                   ))}
                 </select>
               </label>
