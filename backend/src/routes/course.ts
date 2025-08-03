@@ -43,11 +43,14 @@ router.post('/', async (req: AuthRequest, res) => {
 });
 
 // List all courses
-router.get('/', async (_req, res) => {
+router.get('/', async (req: AuthRequest, res) => {
   try {
+    console.log('Fetching all courses for user:', req.user?.id, req.user?.role);
     const courses = await Course.find();
+    console.log('Found courses:', courses.length);
     res.json(courses);
   } catch (err) {
+    console.error('Error fetching courses:', err);
     res.status(500).json({ message: 'Failed to fetch courses.', error: err });
   }
 });

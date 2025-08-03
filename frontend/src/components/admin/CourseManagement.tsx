@@ -34,15 +34,31 @@ const CourseManagement: React.FC = () => {
       return;
     }
     setLoading(true);
+    setError(null);
+    
     fetch(API_ENDPOINTS.COURSES, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     })
       .then(res => {
-        if (!res.ok) throw new Error('Unauthorized');
+        console.log('Course fetch response:', res.status, res.statusText);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch courses: ${res.status} ${res.statusText}`);
+        }
         return res.json();
       })
-      .then(data => { setCourses(data); setLoading(false); })
-      .catch(() => { setError('Failed to fetch courses.'); setLoading(false); });
+      .then(data => { 
+        console.log('Courses data:', data);
+        setCourses(data); 
+        setLoading(false); 
+      })
+      .catch((error) => { 
+        console.error('Error fetching courses:', error);
+        setError(error.message || 'Failed to fetch courses.'); 
+        setLoading(false); 
+      });
   }, [token]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, idx?: number) => {
