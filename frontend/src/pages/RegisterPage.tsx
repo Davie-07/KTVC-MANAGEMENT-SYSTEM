@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { API_ENDPOINTS } from '../config/api';
 import './RegisterPage.css';
@@ -19,7 +19,30 @@ const RegisterPage: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [courses, setCourses] = useState<Array<{_id: string, name: string}>>([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Fetch published courses on component mount
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch(API_ENDPOINTS.PUBLISHED_COURSES);
+        if (response.ok) {
+          const data = await response.json();
+          setCourses(data);
+        } else {
+          console.error('Failed to fetch courses');
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      } finally {
+        setCoursesLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -96,7 +119,16 @@ const RegisterPage: React.FC = () => {
           </div>
           <div className="form-group">
             <label htmlFor="course">Course</label>
-            <input type="text" id="course" name="course" value={form.course} onChange={handleChange} required placeholder="Enter your course" />
+            <select id="course" name="course" value={form.course} onChange={handleChange} required>
+              <option value="">Select Course</option>
+              {coursesLoading ? (
+                <option value="" disabled>Loading courses...</option>
+              ) : (
+                courses.map((course) => (
+                  <option key={course._id} value={course.name}>{course.name}</option>
+                ))
+              )}
+            </select>
           </div>
         </div>
         <div className="form-row">
