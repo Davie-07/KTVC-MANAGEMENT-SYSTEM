@@ -3,7 +3,7 @@ import { useState } from 'react'
 import './App.css'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
-import MainContent from './components/MainContent'
+
 import HomePage from './components/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import VerifyEmailPage from './pages/VerifyEmailPage';
@@ -108,7 +108,7 @@ function App() {
           </div>
         </ProtectedRoute>
       } />
-      <Route path="/*" element={<MainContent />} />
+      <Route path="/*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
