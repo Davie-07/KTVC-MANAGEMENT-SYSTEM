@@ -4,8 +4,8 @@ import { authenticate, requireAdmin, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// Get published courses (accessible by admin and teachers)
-router.get('/published', authenticate, async (req: AuthRequest, res) => {
+// Get published courses (publicly accessible for registration)
+router.get('/published', async (req, res) => {
   try {
     const courses = await Course.find({ published: true });
     res.json(courses);

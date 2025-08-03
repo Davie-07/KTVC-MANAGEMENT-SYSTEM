@@ -27,12 +27,16 @@ const RegisterPage: React.FC = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
+        console.log('Fetching published courses from:', API_ENDPOINTS.PUBLISHED_COURSES);
         const response = await fetch(API_ENDPOINTS.PUBLISHED_COURSES);
+        console.log('Courses response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log('Fetched courses:', data);
           setCourses(data);
         } else {
-          console.error('Failed to fetch courses');
+          console.error('Failed to fetch courses:', response.status, response.statusText);
         }
       } catch (error) {
         console.error('Error fetching courses:', error);
