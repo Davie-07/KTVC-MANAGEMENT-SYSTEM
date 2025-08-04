@@ -30,7 +30,11 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
       fetch(`${API_ENDPOINTS.EXAM_RESULTS}/students`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json())
     ])
       .then(([teachersData, studentsData]) => {
-        setTeachers(Array.isArray(teachersData) ? teachersData : []);
+        // Filter out null/invalid teachers
+        const validTeachers = Array.isArray(teachersData)
+          ? teachersData.filter(t => t && typeof t.firstName === 'string' && typeof t.lastName === 'string' && typeof t.email === 'string')
+          : [];
+        setTeachers(validTeachers);
         setStudents(Array.isArray(studentsData) ? studentsData : []);
       })
       .catch(() => {
@@ -152,9 +156,11 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
             disabled={loadingOptions}
           >
             <option value="">Select teacher...</option>
-            {filteredTeachers.map(t => (
-              <option key={t._id} value={t._id}>{t.firstName} {t.lastName} ({t.email})</option>
-            ))}
+            {filteredTeachers.map((t, idx) =>
+              t
+                ? <option key={t._id} value={t._id}>{t.firstName} {t.lastName} ({t.email})</option>
+                : <option key={idx} value="">Unknown Teacher</option>
+            )}
           </select>
         </label>
       </div>
