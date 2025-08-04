@@ -252,6 +252,15 @@ const Tuchat: React.FC = () => {
     return message.sender._id === user?.id;
   };
 
+  // Don't render if user is not loaded
+  if (!user) {
+    return (
+      <div className="tuchat-container">
+        <div className="loading">Loading Tuchat...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="tuchat-container">
       <div className="tuchat-header">
@@ -289,13 +298,13 @@ const Tuchat: React.FC = () => {
                       onClick={() => handleUserSelect(user)}
                     >
                       <div className="user-avatar">
-                        {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                        {user?.firstName?.charAt(0) || 'U'}{user?.lastName?.charAt(0) || 'S'}
                         <div className={`online-status ${user.isOnline ? 'online' : 'offline'}`}></div>
                       </div>
                       <div className="user-info">
-                        <div className="user-name">{user?.firstName} {user?.lastName}</div>
-                        <div className="user-course">{user.course}</div>
-                        <div className="user-role">{user.role}</div>
+                        <div className="user-name">{user?.firstName || 'Unknown'} {user?.lastName || 'User'}</div>
+                        <div className="user-course">{user?.course || 'No Course'}</div>
+                        <div className="user-role">{user?.role || 'User'}</div>
                         <div className="friend-status">
                           {user.isFriend ? '👥 Friend' : '👤 User'}
                         </div>
@@ -314,11 +323,11 @@ const Tuchat: React.FC = () => {
                       onClick={() => handleUserSelect(user)}
                     >
                       <div className="user-avatar">
-                        {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                        {user?.firstName?.charAt(0) || 'U'}{user?.lastName?.charAt(0) || 'S'}
                         <div className={`online-status ${user.isOnline ? 'online' : 'offline'}`}></div>
                       </div>
                       <div className="conversation-info">
-                        <div className="user-name">{user?.firstName} {user?.lastName}</div>
+                        <div className="user-name">{user?.firstName || 'Unknown'} {user?.lastName || 'User'}</div>
                         <div className="last-message">
                           {user.lastMessage ? (
                             <>
@@ -351,13 +360,13 @@ const Tuchat: React.FC = () => {
               <div className="chat-header">
                 <div className="selected-user-info">
                   <div className="user-avatar">
-                    {selectedUser?.firstName?.charAt(0)}{selectedUser?.lastName?.charAt(0)}
-                    <div className={`online-status ${selectedUser.isOnline ? 'online' : 'offline'}`}></div>
+                    {selectedUser?.firstName?.charAt(0) || 'U'}{selectedUser?.lastName?.charAt(0) || 'S'}
+                    <div className={`online-status ${selectedUser?.isOnline ? 'online' : 'offline'}`}></div>
                   </div>
                   <div>
-                    <div className="user-name">{selectedUser?.firstName} {selectedUser?.lastName}</div>
+                    <div className="user-name">{selectedUser?.firstName || 'Unknown'} {selectedUser?.lastName || 'User'}</div>
                     <div className="user-status">
-                      {selectedUser.isOnline ? '🟢 Online' : '🔴 Offline'}
+                      {selectedUser?.isOnline ? '🟢 Online' : '🔴 Offline'}
                     </div>
                   </div>
                 </div>
