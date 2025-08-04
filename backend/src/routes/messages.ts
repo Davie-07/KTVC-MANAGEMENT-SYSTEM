@@ -19,16 +19,18 @@ router.get('/users', authenticate, async (req: AuthRequest, res) => {
     const currentUser = await User.findById(currentUserId).populate('friends', 'firstName lastName');
     const friendsList = currentUser?.friends || [];
 
-    const usersWithStatus = users.map(user => ({
-      _id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      course: user.course,
-      role: user.role,
-      isOnline: user.isOnline || false,
-      isFriend: friendsList.some((friend: any) => friend._id.toString() === user._id.toString())
-    }));
+    const usersWithStatus = users
+      .filter(user => user && user.firstName && user.lastName) // Filter out null/incomplete users
+      .map(user => ({
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        course: user.course,
+        role: user.role,
+        isOnline: user.isOnline || false,
+        isFriend: friendsList.some((friend: any) => friend._id.toString() === user._id.toString())
+      }));
 
     res.json(usersWithStatus);
   } catch (err) {
@@ -72,20 +74,26 @@ router.get('/conversations', authenticate, async (req: AuthRequest, res) => {
     const conversationUsers = await Promise.all(
       conversations.map(async (conv) => {
         const user = await User.findById(conv._id, 'firstName lastName email course role isOnline');
+        if (!user || !user.firstName || !user.lastName) {
+          return null; // Skip null/incomplete users
+        }
         return {
-          _id: user?._id,
-          firstName: user?.firstName,
-          lastName: user?.lastName,
-          email: user?.email,
-          course: user?.course,
-          role: user?.role,
-          isOnline: user?.isOnline || false,
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          course: user.course,
+          role: user.role,
+          isOnline: user.isOnline || false,
           lastMessage: conv.lastMessage
         };
       })
     );
 
-    res.json(conversationUsers);
+    // Filter out null users
+    const validConversationUsers = conversationUsers.filter(user => user !== null);
+
+    res.json(validConversationUsers);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch conversations.', error: err });
   }
