@@ -30,13 +30,23 @@ const ManageStudents: React.FC = () => {
     setLoading(true);
     try {
       const courseParam = encodeURIComponent(user?.course || '');
+      console.log('Fetching students for course:', courseParam);
       const res = await fetch(
         `${API_ENDPOINTS.STUDENTS_BY_COURSE}/${courseParam}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      if (!res.ok) throw new Error('Failed to fetch');
+      console.log('Students response status:', res.status);
+      
+      if (!res.ok) throw new Error(`Failed to fetch students: ${res.status}`);
+      
       const data: Student[] = await res.json();
-      setStudents(data);
+      console.log('Fetched students data:', data);
+      
+      // Filter out any null or incomplete students
+      const validStudents = data.filter(student => student && student._id && (student.firstName || student.lastName));
+      console.log('Valid students after filtering:', validStudents.length);
+      
+      setStudents(validStudents);
     } catch (err) {
       console.error('Error fetching students:', err);
     } finally {
@@ -104,26 +114,28 @@ const ManageStudents: React.FC = () => {
                 </thead>
 
                 <tbody>
-                  {students.map(student => (
-                    <tr key={student._id}>
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={selectedStudents.includes(student._id)}
-                          onChange={() =>
-                            handleStudentSelect(student._id)
-                          }
-                        />
-                      </td>
-                      <td>
-                        {student?.firstName || 'Unknown'} {student?.lastName || ''}
-                      </td>
-                      <td>{student.email}</td>
-                      <td>{student.phone || 'N/A'}</td>
-                      <td>{student.level}</td>
-                      <td>{student.admission}</td>
-                    </tr>
-                  ))}
+                  {students
+                    .filter(student => student && student._id) // Filter out null students
+                    .map(student => (
+                      <tr key={student._id}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedStudents.includes(student._id)}
+                            onChange={() =>
+                              handleStudentSelect(student._id)
+                            }
+                          />
+                        </td>
+                        <td>
+                          {student?.firstName || 'Unknown'} {student?.lastName || 'Student'}
+                        </td>
+                        <td>{student?.email || 'No email'}</td>
+                        <td>{student?.phone || 'N/A'}</td>
+                        <td>{student?.level || 'N/A'}</td>
+                        <td>{student?.admission || 'N/A'}</td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
