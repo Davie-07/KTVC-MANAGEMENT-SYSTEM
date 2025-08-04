@@ -168,7 +168,7 @@ const ClassManagementList: React.FC = () => {
                     <td style={{padding:'0.5rem'}}>{c.course}</td>
                     <td style={{padding:'0.5rem'}}>{new Date(c.date).toLocaleDateString()}</td>
                     <td style={{padding:'0.5rem'}}>{c.startTime} - {c.endTime}</td>
-                    <td style={{padding:'0.5rem'}}>{c.students.map(s => typeof s === 'string' ? s : `${s.firstName} ${s.lastName}`).join(', ')}</td>
+                    <td style={{padding:'0.5rem'}}>{c.students?.filter(s => s && (typeof s === 'string' || (s.firstName || s.lastName)))?.map(s => typeof s === 'string' ? s : `${s?.firstName || 'Unknown'} ${s?.lastName || 'Student'}`).join(', ') || 'No students'}</td>
                     <td style={{padding:'0.5rem'}}>
                       <button onClick={() => togglePublish(c._id, c.published)} disabled={publishing === c._id} style={{background:c.published ? '#22c55e' : '#ef4444',color:'#fff',border:'none',borderRadius:6,padding:'0.3rem 1rem',fontWeight:600,cursor:'pointer'}}>{publishing === c._id ? '...' : c.published ? 'Unpublish' : 'Publish'}</button>
                     </td>

@@ -166,7 +166,7 @@ const TeacherCalendar: React.FC = () => {
           eventPropGetter={() => ({ style: { background: '#2563eb', color: '#fff', borderRadius: 6 } })}
           views={['month', 'week', 'day', 'agenda']}
           popup
-          tooltipAccessor={event => `${event.title}\nStudents: ${event.students.map((s: any) => ((s && s.firstName) ? s.firstName : 'Unknown') + ' ' + ((s && s.lastName) ? s.lastName : 'Student')).join(', ')}`}
+          tooltipAccessor={event => `${event.title}\nStudents: ${event.students?.filter(s => s && s._id)?.map((s: any) => ((s && s.firstName) ? s.firstName : 'Unknown') + ' ' + ((s && s.lastName) ? s.lastName : 'Student')).join(', ') || 'No students'}`}
           onSelectEvent={onSelectEvent}
           selectable
           onSelectSlot={onSelectSlot}
@@ -202,8 +202,8 @@ const TeacherCalendar: React.FC = () => {
             <div style={{marginBottom:'1rem'}}>
               <label>Students<br/>
                 <select name="students" multiple value={form.students} onChange={handleFormChange} style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff',minHeight:80}}>
-                  {students.map(s => (
-                    <option key={s?._id || Math.random()} value={s?._id || ''}>{(s && s.firstName) ? s.firstName : 'Unknown'} {(s && s.lastName) ? s.lastName : 'Student'} ({(s && s.email) ? s.email : 'No email'})</option>
+                  {students?.filter(s => s && s._id)?.map(s => (
+                    <option key={s._id} value={s._id}>{(s && s.firstName) ? s.firstName : 'Unknown'} {(s && s.lastName) ? s.lastName : 'Student'} ({(s && s.email) ? s.email : 'No email'})</option>
                   ))}
                 </select>
               </label>
@@ -245,7 +245,7 @@ const TeacherCalendar: React.FC = () => {
             <div style={{marginBottom:'1rem'}}>
               <label>Students<br/>
                 <select name="students" multiple value={createForm.students} onChange={handleCreateFormChange} style={{width:'100%',padding:'0.5rem',borderRadius:6,border:'1px solid #444',background:'#18181b',color:'#fff',minHeight:80}}>
-                  {students.map(s => (
+                  {students?.filter(s => s && s._id)?.map(s => (
                     <option key={s._id} value={s._id}>{s?.firstName || 'Unknown'} {s?.lastName || 'Student'} ({s?.email || 'No email'})</option>
                   ))}
                 </select>
