@@ -21,62 +21,88 @@ function getGreeting() {
 
 const TeacherGreetingCard: React.FC = () => {
   const { user, token } = useAuth();
+  const [classesToday, setClassesToday] = useState<number>(0);
+  const [studentsCount, setStudentsCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Safe user data extraction
   const greeting = getGreeting();
-  const name = user?.firstName || 'Teacher';
+  const name = user?.firstName || user?.lastName || 'Teacher';
   const quote = quotes[new Date().getDay() % quotes.length];
 
-  const [classesToday, setClassesToday] = useState<number | null>(null);
-  const [studentsCount, setStudentsCount] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
-
   useEffect(() => {
-    if (!user || !token || !user.id) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    
-    // Fetch today's classes
-    fetch(`${API_ENDPOINTS.CLASSES}/teacher-today/${user.id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch classes');
-        return res.json();
-      })
-      .then(data => setClassesToday(Array.isArray(data) ? data.length : 0))
-      .catch((error) => {
-        console.error('Error fetching classes:', error);
-        setClassesToday(0);
-      });
+    const fetchData = async () => {
+      if (!user?.id || !token) {
+        setLoading(false);
+        return;
+      }
 
-    // Fetch student count for teacher's course
-    if (user.course) {
-      fetch(`${API_ENDPOINTS.STUDENTS_BY_COURSE}/${encodeURIComponent(user.course)}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(res => {
-          if (!res.ok) {
-            console.error('Failed to fetch students:', res.status, res.statusText);
-            throw new Error(`Failed to fetch students: ${res.status}`);
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch today's classes
+        const classesResponse = await fetch(`${API_ENDPOINTS.CLASSES}/teacher-today/${user.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (classesResponse.ok) {
+          const classesData = await classesResponse.json();
+          setClassesToday(Array.isArray(classesData) ? classesData.length : 0);
+        } else {
+          console.error('Failed to fetch classes:', classesResponse.status);
+          setClassesToday(0);
+        }
+
+        // Fetch student count for teacher's course
+        if (user.course) {
+          const studentsResponse = await fetch(
+            `${API_ENDPOINTS.STUDENTS_BY_COURSE}/${encodeURIComponent(user.course)}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          if (studentsResponse.ok) {
+            const studentsData = await studentsResponse.json();
+            console.log('Students data:', studentsData);
+            setStudentsCount(Array.isArray(studentsData) ? studentsData.length : 0);
+          } else {
+            console.error('Failed to fetch students:', studentsResponse.status, studentsResponse.statusText);
+            setStudentsCount(0);
           }
-          return res.json();
-        })
-        .then(data => {
-          console.log('Students data:', data);
-          setStudentsCount(Array.isArray(data) ? data.length : 0);
-        })
-        .catch((error) => {
-          console.error('Error fetching students:', error);
+        } else {
+          console.log('No course assigned to teacher');
           setStudentsCount(0);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      console.log('No course assigned to teacher');
-      setStudentsCount(0);
-      setLoading(false);
-    }
+        }
+      } catch (err) {
+        console.error('Error fetching teacher data:', err);
+        setError('Failed to load dashboard data');
+        setClassesToday(0);
+        setStudentsCount(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [user, token]);
+
+  if (error) {
+    return (
+      <div className="greeting-card">
+        <div className="greeting-header">
+          <div className="greeting-icon">👨‍🏫</div>
+          <div className="greeting-text">
+            <h2 className="greeting-title">{greeting}, {name}!</h2>
+            <p className="greeting-subtitle">Ready to inspire and educate today?</p>
+          </div>
+        </div>
+        <div style={{ color: '#ef4444', textAlign: 'center', padding: '1rem' }}>
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="greeting-card">
@@ -92,14 +118,14 @@ const TeacherGreetingCard: React.FC = () => {
         <div className="stat-item">
           <span className="stat-icon">📚</span>
           <div className="stat-content">
-            <span className="stat-number">{loading ? '...' : classesToday ?? 0}</span>
+            <span className="stat-number">{loading ? '...' : classesToday}</span>
             <span className="stat-label">Classes Today</span>
           </div>
         </div>
         <div className="stat-item">
           <span className="stat-icon">👥</span>
           <div className="stat-content">
-            <span className="stat-number">{loading ? '...' : studentsCount ?? 0}</span>
+            <span className="stat-number">{loading ? '...' : studentsCount}</span>
             <span className="stat-label">Students</span>
           </div>
         </div>
