@@ -20,6 +20,7 @@ router.get('/', authenticate, async (req: AuthRequest, res) => {
     } else if (req.user?.role === 'student') {
       // Students see only their own fees
       fees = await StudentFee.find({ student: req.user.id })
+        .populate('student', 'firstName lastName email course')
         .sort({ academicYear: -1, semester: 1 });
     } else if (req.user?.role === 'admin') {
       // Admins see all fees
