@@ -25,19 +25,27 @@ const CreateClassForm: React.FC<{ onCreated?: () => void }> = ({ onCreated }) =>
 
   useEffect(() => {
     setLoadingOptions(true);
+    // Use the correct endpoint for teachers
     Promise.all([
-      fetch(`${API_ENDPOINTS.CLASSES}/teachers`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
+      fetch(API_ENDPOINTS.TEACHERS, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
       fetch(`${API_ENDPOINTS.EXAM_RESULTS}/students`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json())
     ])
       .then(([teachersData, studentsData]) => {
-        // Filter out null/invalid teachers
+        // Debug: log the raw teacher data
+        console.log('Fetched teachersData:', teachersData);
+        // Filter out null/invalid teachers and log any issues
         const validTeachers = Array.isArray(teachersData)
-          ? teachersData.filter(t => t && typeof t.firstName === 'string' && typeof t.lastName === 'string' && typeof t.email === 'string')
+          ? teachersData.filter((t, i) => {
+              const valid = t && typeof t.firstName === 'string' && typeof t.lastName === 'string' && typeof t.email === 'string';
+              if (!valid) console.warn('Invalid teacher entry at index', i, t);
+              return valid;
+            })
           : [];
         setTeachers(validTeachers);
         setStudents(Array.isArray(studentsData) ? studentsData : []);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('Error fetching teachers/students:', err);
         setTeachers([]);
         setStudents([]);
       })
