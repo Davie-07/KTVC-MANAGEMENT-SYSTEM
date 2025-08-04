@@ -116,7 +116,7 @@ const ManageStudents: React.FC = () => {
                         />
                       </td>
                       <td>
-                        {student.firstName} {student.lastName}
+                        {student?.firstName || 'Unknown'} {student?.lastName || ''}
                       </td>
                       <td>{student.email}</td>
                       <td>{student.phone || 'N/A'}</td>

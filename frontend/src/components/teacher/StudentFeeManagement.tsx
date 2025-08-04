@@ -180,7 +180,7 @@ const StudentFeeManagement: React.FC = () => {
             <tbody>
               {fees.map(fee => (
                 <tr key={fee._id}>
-                  <td>{fee.student.firstName} {fee.student.lastName}</td>
+                  <td>{fee.student?.firstName || 'Unknown'} {fee.student?.lastName || ''}</td>
                   <td>{fee.course}</td>
                   <td>{fee.academicYear}</td>
                   <td>{fee.semester}</td>
