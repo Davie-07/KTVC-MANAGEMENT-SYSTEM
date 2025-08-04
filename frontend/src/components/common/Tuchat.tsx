@@ -106,14 +106,23 @@ const Tuchat: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      console.log('Fetching users from:', `${API_ENDPOINTS.MESSAGES}/users`);
       const response = await fetch(`${API_ENDPOINTS.MESSAGES}/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (!response.ok) throw new Error('Failed to fetch users');
+      console.log('Users response status:', response.status);
+      
+      if (!response.ok) throw new Error(`Failed to fetch users: ${response.status}`);
       
       const data = await response.json();
-      setUsers(data);
+      console.log('Fetched users data:', data);
+      
+      // Additional safety check - filter out any null users
+      const validUsers = data.filter((user: any) => user && user._id && (user.firstName || user.lastName));
+      console.log('Valid users after filtering:', validUsers.length);
+      
+      setUsers(validUsers);
     } catch (err) {
       setError('Failed to load users');
       console.error('Error fetching users:', err);
@@ -126,14 +135,23 @@ const Tuchat: React.FC = () => {
   const fetchConversations = async () => {
     try {
       setLoading(true);
+      console.log('Fetching conversations from:', `${API_ENDPOINTS.MESSAGES}/conversations`);
       const response = await fetch(`${API_ENDPOINTS.MESSAGES}/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (!response.ok) throw new Error('Failed to fetch conversations');
+      console.log('Conversations response status:', response.status);
+      
+      if (!response.ok) throw new Error(`Failed to fetch conversations: ${response.status}`);
       
       const data = await response.json();
-      setConversations(data);
+      console.log('Fetched conversations data:', data);
+      
+      // Additional safety check - filter out any null users
+      const validConversations = data.filter((user: any) => user && user._id && (user.firstName || user.lastName));
+      console.log('Valid conversations after filtering:', validConversations.length);
+      
+      setConversations(validConversations);
     } catch (err) {
       setError('Failed to load conversations');
       console.error('Error fetching conversations:', err);
@@ -289,67 +307,71 @@ const Tuchat: React.FC = () => {
             <div className="loading">Loading...</div>
           ) : (
             <>
-              {activeTab === 'friends' && (
-                <div className="users-grid">
-                  {users.map(user => (
-                    <div 
-                      key={user._id}
-                      className={`user-card ${selectedUser?._id === user._id ? 'selected' : ''}`}
-                      onClick={() => handleUserSelect(user)}
-                    >
-                      <div className="user-avatar">
-                        {user?.firstName?.charAt(0) || 'U'}{user?.lastName?.charAt(0) || 'S'}
-                        <div className={`online-status ${user.isOnline ? 'online' : 'offline'}`}></div>
-                      </div>
-                      <div className="user-info">
-                        <div className="user-name">{user?.firstName || 'Unknown'} {user?.lastName || 'User'}</div>
-                        <div className="user-course">{user?.course || 'No Course'}</div>
-                        <div className="user-role">{user?.role || 'User'}</div>
-                        <div className="friend-status">
-                          {user.isFriend ? '👥 Friend' : '👤 User'}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                             {activeTab === 'friends' && (
+                 <div className="users-grid">
+                   {users
+                     .filter(user => user && user._id && (user.firstName || user.lastName)) // Additional safety filter
+                     .map(user => (
+                       <div 
+                         key={user._id}
+                         className={`user-card ${selectedUser?._id === user._id ? 'selected' : ''}`}
+                         onClick={() => handleUserSelect(user)}
+                       >
+                         <div className="user-avatar">
+                           {user?.firstName?.charAt(0) || 'U'}{user?.lastName?.charAt(0) || 'S'}
+                           <div className={`online-status ${user?.isOnline ? 'online' : 'offline'}`}></div>
+                         </div>
+                         <div className="user-info">
+                           <div className="user-name">{user?.firstName || 'Unknown'} {user?.lastName || 'User'}</div>
+                           <div className="user-course">{user?.course || 'No Course'}</div>
+                           <div className="user-role">{user?.role || 'User'}</div>
+                           <div className="friend-status">
+                             {user?.isFriend ? '👥 Friend' : '👤 User'}
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                 </div>
+               )}
 
-              {activeTab === 'messages' && (
-                <div className="conversations-list">
-                  {conversations.map(user => (
-                    <div 
-                      key={user._id}
-                      className={`conversation-item ${selectedUser?._id === user._id ? 'selected' : ''}`}
-                      onClick={() => handleUserSelect(user)}
-                    >
-                      <div className="user-avatar">
-                        {user?.firstName?.charAt(0) || 'U'}{user?.lastName?.charAt(0) || 'S'}
-                        <div className={`online-status ${user.isOnline ? 'online' : 'offline'}`}></div>
-                      </div>
-                      <div className="conversation-info">
-                        <div className="user-name">{user?.firstName || 'Unknown'} {user?.lastName || 'User'}</div>
-                        <div className="last-message">
-                          {user.lastMessage ? (
-                            <>
-                              <span className="message-preview">
-                                {user.lastMessage.content.length > 30 
-                                  ? user.lastMessage.content.substring(0, 30) + '...' 
-                                  : user.lastMessage.content
-                                }
-                              </span>
-                              <span className="message-time">
-                                {formatTime(user.lastMessage.timestamp)}
-                              </span>
-                            </>
-                          ) : (
-                            <span className="no-messages">No messages yet</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                             {activeTab === 'messages' && (
+                 <div className="conversations-list">
+                   {conversations
+                     .filter(user => user && user._id && (user.firstName || user.lastName)) // Additional safety filter
+                     .map(user => (
+                       <div 
+                         key={user._id}
+                         className={`conversation-item ${selectedUser?._id === user._id ? 'selected' : ''}`}
+                         onClick={() => handleUserSelect(user)}
+                       >
+                         <div className="user-avatar">
+                           {user?.firstName?.charAt(0) || 'U'}{user?.lastName?.charAt(0) || 'S'}
+                           <div className={`online-status ${user?.isOnline ? 'online' : 'offline'}`}></div>
+                         </div>
+                         <div className="conversation-info">
+                           <div className="user-name">{user?.firstName || 'Unknown'} {user?.lastName || 'User'}</div>
+                           <div className="last-message">
+                             {user?.lastMessage ? (
+                               <>
+                                 <span className="message-preview">
+                                   {user.lastMessage.content.length > 30 
+                                     ? user.lastMessage.content.substring(0, 30) + '...' 
+                                     : user.lastMessage.content
+                                   }
+                                 </span>
+                                 <span className="message-time">
+                                   {formatTime(user.lastMessage.timestamp)}
+                                 </span>
+                               </>
+                             ) : (
+                               <span className="no-messages">No messages yet</span>
+                             )}
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                 </div>
+               )}
             </>
           )}
         </div>
