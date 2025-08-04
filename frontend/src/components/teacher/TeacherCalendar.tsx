@@ -74,7 +74,7 @@ const TeacherCalendar: React.FC = () => {
             course: cls.course || 'Unknown Course',
             start: new Date(cls.date + 'T' + (cls.startTime || '00:00')),
             end: new Date(cls.date + 'T' + (cls.endTime || '01:00')),
-            students: Array.isArray(cls.students) ? cls.students.filter(s => s && s._id) : [],
+            students: Array.isArray(cls.students) ? cls.students.filter((s: any) => s && s._id) : [],
           }));
           setEvents(formattedEvents);
         } else {
@@ -103,7 +103,7 @@ const TeacherCalendar: React.FC = () => {
         
         if (response.ok) {
           const data = await response.json();
-          const validStudents = Array.isArray(data) ? data.filter(s => s && s._id) : [];
+          const validStudents = Array.isArray(data) ? data.filter((s: any) => s && s._id) : [];
           setStudents(validStudents);
         } else {
           setStudents([]);

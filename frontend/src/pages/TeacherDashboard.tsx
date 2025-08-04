@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { API_ENDPOINTS } from '../config/api';
 import TeacherGreetingCard from '../components/teacher/TeacherGreetingCard';
 import AdvancedSearch from '../components/common/AdvancedSearch';
 import DataExport from '../components/common/DataExport';
@@ -26,7 +25,7 @@ interface TeacherDashboardProps {
   onTabChange?: (tab: string) => void;
 }
 
-const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ activeTab, onTabChange }) => {
+const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ activeTab }) => {
   const { user, token } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
