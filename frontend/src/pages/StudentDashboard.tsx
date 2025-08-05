@@ -11,6 +11,8 @@ import ExamResultsChart from '../components/student/ExamResultsChart';
 import GrowthCharts from '../components/common/GrowthCharts';
 import Tuchat from '../components/common/Tuchat';
 import StudentNotificationPanel from '../components/student/StudentNotificationPanel';
+import AskDave from '../components/student/AskDave';
+import Settings from '../components/Settings';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 
@@ -69,34 +71,43 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ activeTab }) => {
       );
       break;
     case 'announcements':
-      mainContent = <div style={{color:'#fff'}}>Announcements Component (Coming Soon)</div>;
+      mainContent = <div style={{color:'#fff', padding:'2rem', textAlign:'center'}}>Announcements Component (Coming Soon)</div>;
       break;
     case 'classes':
       mainContent = <StudentCalendar />;
       break;
     case 'friends':
-      mainContent = <div style={{color:'#fff'}}>Friends Component (Coming Soon)</div>;
+      mainContent = <div style={{color:'#fff', padding:'2rem', textAlign:'center'}}>Friends Component (Coming Soon)</div>;
       break;
     case 'messages':
-      mainContent = <div style={{color:'#fff'}}>Messages Component (Coming Soon)</div>;
+      mainContent = <div style={{color:'#fff', padding:'2rem', textAlign:'center'}}>Messages Component (Coming Soon)</div>;
       break;
     case 'upskill':
-      mainContent = <div style={{color:'#fff'}}>Upskill Opportunities (Coming Soon)</div>;
+      mainContent = <div style={{color:'#fff', padding:'2rem', textAlign:'center'}}>Upskill Opportunities (Coming Soon)</div>;
       break;
     case 'refer':
-      mainContent = <div style={{color:'#fff'}}>Refer and Earn (Coming Soon)</div>;
+      mainContent = <div style={{color:'#fff', padding:'2rem', textAlign:'center'}}>Refer and Earn (Coming Soon)</div>;
       break;
     case 'ask-dave':
-      mainContent = <div style={{color:'#fff'}}>Ask Dave (Coming Soon)</div>;
+      mainContent = <AskDave />;
       break;
     case 'tuchat':
       mainContent = <Tuchat />;
       break;
     case 'settings':
-      mainContent = <div style={{color:'#fff'}}>Settings Component (Coming Soon)</div>;
+      mainContent = <Settings />;
+      break;
+    case 'fees':
+      mainContent = <FeeStatusChart />;
+      break;
+    case 'exams':
+      mainContent = <ExamResultsChart />;
+      break;
+    case 'users':
+      mainContent = <div style={{color:'#fff', padding:'2rem', textAlign:'center'}}>Users Component (Coming Soon)</div>;
       break;
     default:
-      mainContent = <div style={{color:'#fff'}}>Select a tab from the sidebar.</div>;
+      mainContent = <div style={{color:'#fff', padding:'2rem', textAlign:'center'}}>Select a tab from the sidebar.</div>;
   }
 
   return (

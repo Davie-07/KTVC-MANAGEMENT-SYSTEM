@@ -1,5 +1,8 @@
 import { Router } from 'express';
 import { authenticate, requireAdmin } from '../middleware/auth';
+import User from '../models/User';
+import Course from '../models/Course';
+import Class from '../models/Class';
 
 const router = Router();
 
@@ -22,18 +25,55 @@ router.get('/status', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
-// Growth data endpoint
+// Growth data endpoint - now uses real data
 router.get('/growth-data', authenticate, async (req, res) => {
   try {
-    // Mock growth data - in real app, calculate from actual data
-    const growthData = [
-      { month: 'Jan', students: 120, teachers: 15, courses: 8, classes: 45 },
-      { month: 'Feb', students: 135, teachers: 18, courses: 10, classes: 52 },
-      { month: 'Mar', students: 142, teachers: 20, courses: 12, classes: 58 },
-      { month: 'Apr', students: 158, teachers: 22, courses: 14, classes: 65 },
-      { month: 'May', students: 165, teachers: 25, courses: 16, classes: 72 },
-      { month: 'Jun', students: 172, teachers: 28, courses: 18, classes: 80 }
-    ];
+    // Get current month and year
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    // Generate growth data for the last 6 months
+    const growthData = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const targetDate = new Date(currentYear, currentMonth - i, 1);
+      const monthName = targetDate.toLocaleString('default', { month: 'short' });
+      
+      // Calculate data for this month
+      const monthStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+      const monthEnd = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+      
+      // Count students created in this month
+      const studentsCount = await User.countDocuments({
+        role: 'student',
+        createdAt: { $gte: monthStart, $lte: monthEnd }
+      });
+      
+      // Count teachers created in this month
+      const teachersCount = await User.countDocuments({
+        role: 'teacher',
+        createdAt: { $gte: monthStart, $lte: monthEnd }
+      });
+      
+      // Count courses created in this month
+      const coursesCount = await Course.countDocuments({
+        createdAt: { $gte: monthStart, $lte: monthEnd }
+      });
+      
+      // Count classes created in this month
+      const classesCount = await Class.countDocuments({
+        createdAt: { $gte: monthStart, $lte: monthEnd }
+      });
+      
+      growthData.push({
+        month: monthName,
+        students: studentsCount,
+        teachers: teachersCount,
+        courses: coursesCount,
+        classes: classesCount
+      });
+    }
     
     res.json(growthData);
   } catch (error) {

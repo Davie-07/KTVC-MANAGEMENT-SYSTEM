@@ -127,12 +127,15 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ activeTab }) => {
               <div className="card-full">
                 <TeacherNotificationPanel />
               </div>
+              <div className="card-full">
+                <GrowthCharts />
+              </div>
               <div className="card-row-2">
                 <div className="card-half">
-                  <GrowthCharts />
+                  <CourseStudentCount />
                 </div>
                 <div className="card-half">
-                  <CourseStudentCount />
+                  <div style={{color:'#fff', padding:'1rem'}}>Additional Stats (Coming Soon)</div>
                 </div>
               </div>
             </div>
@@ -182,6 +185,48 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ activeTab }) => {
 
         case 'settings':
           return <Settings />;
+
+        case 'classes':
+          return <TeacherCalendar />;
+
+        case 'exams':
+          return (
+            <div className="dashboard-container">
+              <div className="card-full">
+                <CreateExamResultForm />
+              </div>
+              <div className="card-full">
+                <ExamResultsList />
+              </div>
+            </div>
+          );
+
+        case 'fees':
+          return (
+            <div className="dashboard-container">
+              <div className="card-full">
+                <StudentFeeManagement />
+              </div>
+              <div className="card-full">
+                <ManageFeeStatusForm />
+              </div>
+            </div>
+          );
+
+        case 'upskill':
+          return <div style={{color:'#fff', padding:'2rem', textAlign:'center'}}>Upskill Component (Coming Soon)</div>;
+
+        case 'student-fees':
+          return (
+            <div className="dashboard-container">
+              <div className="card-full">
+                <StudentFeeManagement />
+              </div>
+              <div className="card-full">
+                <ManageFeeStatusForm />
+              </div>
+            </div>
+          );
 
         default:
           return (
