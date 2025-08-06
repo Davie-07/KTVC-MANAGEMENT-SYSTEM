@@ -23,6 +23,7 @@ const ExamResultsList: React.FC = () => {
   const { token } = useAuth();
   const [results, setResults] = useState<ExamResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     unit: '',
@@ -34,19 +35,53 @@ const ExamResultsList: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  const fetchResults = () => {
+  const fetchResults = async () => {
+    if (!token) {
+      setError('Authentication required. Please log in again.');
+      return;
+    }
+    
     setLoading(true);
-    fetch(API_ENDPOINTS.EXAM_RESULTS, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => setResults(Array.isArray(data) ? data : []))
-      .catch(() => setResults([]))
-      .finally(() => setLoading(false));
+    setError(null);
+    try {
+      const response = await fetch(API_ENDPOINTS.EXAM_RESULTS, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setResults(data);
+        } else {
+          console.error('Invalid response format:', data);
+          setError('Invalid response format from server.');
+          setResults([]);
+        }
+      } else {
+        console.error('Failed to fetch exam results:', response.status, response.statusText);
+        if (response.status === 401) {
+          setError('Authentication failed. Please log in again.');
+        } else if (response.status === 403) {
+          setError('Access denied. You do not have permission to view exam results.');
+        } else {
+          setError(`Failed to load exam results (${response.status}). Please try again.`);
+        }
+        setResults([]);
+      }
+    } catch (error) {
+      console.error('Error fetching exam results:', error);
+      setError('Failed to load exam results. Please check your connection and try again.');
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    if (token) fetchResults();
+    fetchResults();
   }, [token]);
 
   const startEdit = (r: ExamResult) => {
@@ -73,7 +108,7 @@ const ExamResultsList: React.FC = () => {
   };
 
   const saveEdit = async () => {
-    if (!editId) return;
+    if (!editId || !token) return;
     setSaving(true);
     try {
       const response = await fetch(`${API_ENDPOINTS.EXAM_RESULTS}/${editId}`, {
@@ -89,9 +124,13 @@ const ExamResultsList: React.FC = () => {
         setResults(prev => prev.map(r => r._id === editId ? updated : r));
         setEditId(null);
         setEditForm({ unit: '', cam1: '', cam2: '', cam3: '', average: '' });
+      } else {
+        console.error('Failed to update exam result:', response.status, response.statusText);
+        setError('Failed to update exam result. Please try again.');
       }
     } catch (error) {
       console.error('Error saving edit:', error);
+      setError('Failed to update exam result. Please check your connection and try again.');
     } finally {
       setSaving(false);
     }
@@ -99,10 +138,11 @@ const ExamResultsList: React.FC = () => {
 
   const cancelEdit = () => {
     setEditId(null);
+    setEditForm({ unit: '', cam1: '', cam2: '', cam3: '', average: '' });
   };
 
   const deleteResult = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this exam result?')) return;
+    if (!window.confirm('Are you sure you want to delete this exam result?') || !token) return;
     setDeleting(id);
     try {
       const response = await fetch(`${API_ENDPOINTS.EXAM_RESULTS}/${id}`, {
@@ -111,9 +151,13 @@ const ExamResultsList: React.FC = () => {
       });
       if (response.ok) {
         setResults(prev => prev.filter(r => r._id !== id));
+      } else {
+        console.error('Failed to delete exam result:', response.status, response.statusText);
+        setError('Failed to delete exam result. Please try again.');
       }
     } catch (error) {
       console.error('Error deleting result:', error);
+      setError('Failed to delete exam result. Please check your connection and try again.');
     } finally {
       setDeleting(null);
     }
@@ -122,9 +166,31 @@ const ExamResultsList: React.FC = () => {
   return (
     <div style={{ background: '#23232b', color: '#fff', borderRadius: 12, padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 2px 12px #0002', maxWidth: 800 }}>
       <h3>All Exam Results</h3>
+      
+      {error && (
+        <div style={{ background: '#dc2626', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem' }}>
+          {error}
+          <button
+            onClick={() => fetchResults()}
+            style={{
+              background: '#3b82f6',
+              color: '#fff',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              marginLeft: '1rem'
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+      
       {loading ? (
         <p>Loading results...</p>
-      ) : results.length === 0 ? (
+      ) : results.length === 0 && !error ? (
         <p>No results found.</p>
       ) : (
         <table style={{ width: '100%', color: '#fff', borderCollapse: 'collapse' }}>

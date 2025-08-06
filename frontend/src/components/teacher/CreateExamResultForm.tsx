@@ -29,6 +29,7 @@ const CreateExamResultForm: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   
   const [form, setForm] = useState({
     unit: '',
@@ -39,40 +40,77 @@ const CreateExamResultForm: React.FC = () => {
 
   useEffect(() => {
     const fetchStudents = async () => {
+      if (!token) {
+        setError('Authentication required. Please log in again.');
+        return;
+      }
+      
+      setLoading(true);
+      setError(null);
       try {
         const response = await fetch(`${API_ENDPOINTS.EXAM_RESULTS_STUDENTS}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
+        
         if (response.ok) {
           const data = await response.json();
-          setStudents(data);
+          if (Array.isArray(data)) {
+            setStudents(data);
+          } else {
+            console.error('Invalid response format:', data);
+            setError('Invalid response format from server.');
+            setStudents([]);
+          }
+        } else {
+          console.error('Failed to fetch students:', response.status, response.statusText);
+          if (response.status === 401) {
+            setError('Authentication failed. Please log in again.');
+          } else if (response.status === 403) {
+            setError('Access denied. You do not have permission to view students.');
+          } else {
+            setError(`Failed to load students (${response.status}). Please try again.`);
+          }
+          setStudents([]);
         }
       } catch (error) {
         console.error('Error fetching students:', error);
+        setError('Failed to load students. Please check your connection and try again.');
+        setStudents([]);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (token) {
-      fetchStudents();
-    }
+    fetchStudents();
   }, [token]);
 
   useEffect(() => {
     if (selectedStudent) {
       const fetchStudentHistory = async () => {
         try {
-          const response = await fetch(`${API_ENDPOINTS.EXAM_RESULTS_HISTORY}/${selectedStudent}`);
+          const response = await fetch(`${API_ENDPOINTS.EXAM_RESULTS_HISTORY}/${selectedStudent}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
           if (response.ok) {
             const data = await response.json();
-            setStudentHistory(data);
+            setStudentHistory(Array.isArray(data) ? data : []);
+          } else {
+            console.error('Failed to fetch student history:', response.status, response.statusText);
+            setStudentHistory([]);
           }
         } catch (error) {
           console.error('Error fetching student history:', error);
+          setStudentHistory([]);
         }
       };
       fetchStudentHistory();
+    } else {
+      setStudentHistory([]);
     }
-  }, [selectedStudent]);
+  }, [selectedStudent, token]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -148,10 +186,12 @@ const CreateExamResultForm: React.FC = () => {
         setSelectedStudent('');
         // Refresh student history
         if (selectedStudent) {
-          const historyResponse = await fetch(`${API_ENDPOINTS.EXAM_RESULTS_HISTORY}/${selectedStudent}`);
+          const historyResponse = await fetch(`${API_ENDPOINTS.EXAM_RESULTS_HISTORY}/${selectedStudent}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
           if (historyResponse.ok) {
             const historyData = await historyResponse.json();
-            setStudentHistory(historyData);
+            setStudentHistory(Array.isArray(historyData) ? historyData : []);
           }
         }
       } else {
@@ -159,7 +199,7 @@ const CreateExamResultForm: React.FC = () => {
         setError(errorData.message || 'Failed to create exam result');
       }
     } catch (error) {
-      setError('Error creating exam result');
+      setError('Error creating exam result. Please check your connection and try again.');
       console.error('Error:', error);
     } finally {
       setSubmitting(false);
@@ -168,6 +208,32 @@ const CreateExamResultForm: React.FC = () => {
 
   const selectedStudentData = students.find(s => s._id === selectedStudent);
   const average = calculateAverage();
+
+  // If there's an error and no students loaded, show a retry button
+  if (error && students.length === 0 && !loading) {
+    return (
+      <div style={{ color: '#fff', padding: '1rem' }}>
+        <h2>Create Exam Result</h2>
+        <div style={{ background: '#dc2626', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem' }}>
+          {error}
+        </div>
+        <button
+          onClick={() => window.location.reload()}
+          style={{
+            background: '#3b82f6',
+            color: '#fff',
+            border: 'none',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: 600
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ color: '#fff', padding: '1rem' }}>
@@ -190,19 +256,25 @@ const CreateExamResultForm: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>
             <label>Select Student:</label>
-            <select
-              value={selectedStudent}
-              onChange={(e) => setSelectedStudent(e.target.value)}
-              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
-              required
-            >
-              <option value="">Choose a student...</option>
-              {students.map(student => (
-                <option key={student._id} value={student._id}>
-                  {student.firstName} {student.lastName} - {student.course}
-                </option>
-              ))}
-            </select>
+            {loading ? (
+              <div style={{ padding: '0.5rem', color: '#9ca3af' }}>Loading students...</div>
+            ) : students.length === 0 ? (
+              <div style={{ padding: '0.5rem', color: '#9ca3af' }}>No students available</div>
+            ) : (
+              <select
+                value={selectedStudent}
+                onChange={(e) => setSelectedStudent(e.target.value)}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #4b5563', background: '#1f2937', color: '#fff' }}
+                required
+              >
+                <option value="">Choose a student...</option>
+                {students.map(student => (
+                  <option key={student._id} value={student._id}>
+                    {student.firstName} {student.lastName} - {student.course}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
@@ -332,14 +404,14 @@ const CreateExamResultForm: React.FC = () => {
 
           <button
             type="submit"
-            disabled={submitting || !selectedStudent || !form.unit}
+            disabled={submitting || !selectedStudent || !form.unit || loading}
             style={{
-              background: submitting || !selectedStudent || !form.unit ? '#6b7280' : '#3b82f6',
+              background: submitting || !selectedStudent || !form.unit || loading ? '#6b7280' : '#3b82f6',
               color: '#fff',
               border: 'none',
               padding: '0.75rem 1.5rem',
               borderRadius: '6px',
-              cursor: submitting || !selectedStudent || !form.unit ? 'not-allowed' : 'pointer',
+              cursor: submitting || !selectedStudent || !form.unit || loading ? 'not-allowed' : 'pointer',
               fontWeight: 600,
               width: '100%'
             }}
