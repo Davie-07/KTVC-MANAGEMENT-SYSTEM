@@ -4,21 +4,21 @@ import { API_ENDPOINTS } from '../../config/api';
 
 interface Student {
   _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  course: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  course?: string;
 }
 
 interface ExamResult {
   _id: string;
-  studentId: string;
-  unit: string;
-  cam1: { score: number; outOf: number };
-  cam2: { score: number; outOf: number };
-  cam3: { score: number; outOf: number };
-  average: number;
-  createdAt: string;
+  studentId?: string;
+  unit?: string;
+  cam1?: { score: number; outOf: number };
+  cam2?: { score: number; outOf: number };
+  cam3?: { score: number; outOf: number };
+  average?: number;
+  createdAt?: string;
 }
 
 const CreateExamResultForm: React.FC = () => {
@@ -423,7 +423,7 @@ const CreateExamResultForm: React.FC = () => {
 
       {selectedStudentData && (
         <div style={{ background: '#374151', padding: '1.5rem', borderRadius: '8px' }}>
-          <h3>Exam History for {selectedStudentData.firstName} {selectedStudentData.lastName}</h3>
+          <h3>Exam History for {selectedStudentData.firstName || 'Unknown'} {selectedStudentData.lastName || ''}</h3>
           {studentHistory.length === 0 ? (
             <p>No exam results found for this student.</p>
           ) : (
@@ -431,24 +431,24 @@ const CreateExamResultForm: React.FC = () => {
               {studentHistory.map((result) => (
                 <div key={result._id} style={{ background: '#4b5563', padding: '1rem', borderRadius: '6px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <h4 style={{ margin: 0 }}>{result.unit}</h4>
+                    <h4 style={{ margin: 0 }}>{result.unit || 'N/A'}</h4>
                     <span style={{ 
-                      background: result.average >= 70 ? '#059669' : result.average >= 50 ? '#d97706' : '#dc2626',
+                      background: (result.average || 0) >= 70 ? '#059669' : (result.average || 0) >= 50 ? '#d97706' : '#dc2626',
                       color: '#fff',
                       padding: '0.25rem 0.5rem',
                       borderRadius: '4px',
                       fontSize: '0.875rem'
                     }}>
-                      {result.average.toFixed(1)}%
+                      {(result.average || 0).toFixed(1)}%
                     </span>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', fontSize: '0.875rem' }}>
-                    <div>CAM 1: {result.cam1.score}/{result.cam1.outOf}</div>
-                    <div>CAM 2: {result.cam2.score}/{result.cam2.outOf}</div>
-                    <div>CAM 3: {result.cam3.score}/{result.cam3.outOf}</div>
+                    <div>CAM 1: {result.cam1?.score || 0}/{result.cam1?.outOf || 0}</div>
+                    <div>CAM 2: {result.cam2?.score || 0}/{result.cam2?.outOf || 0}</div>
+                    <div>CAM 3: {result.cam3?.score || 0}/{result.cam3?.outOf || 0}</div>
                   </div>
                   <small style={{ color: '#9ca3af' }}>
-                    {new Date(result.createdAt).toLocaleDateString()}
+                    {result.createdAt ? new Date(result.createdAt).toLocaleDateString() : 'No date'}
                   </small>
                 </div>
               ))}

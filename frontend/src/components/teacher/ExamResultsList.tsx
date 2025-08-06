@@ -4,19 +4,19 @@ import { API_ENDPOINTS } from '../../config/api';
 
 interface Student {
   _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
 }
 
 interface ExamResult {
   _id: string;
-  student: Student | string;
-  unit: string;
-  cam1: { score: number; outOf: number };
-  cam2: { score: number; outOf: number };
-  cam3: { score: number; outOf: number };
-  average: number;
+  student: Student | string | null;
+  unit?: string;
+  cam1?: { score: number; outOf: number };
+  cam2?: { score: number; outOf: number };
+  cam3?: { score: number; outOf: number };
+  average?: number;
 }
 
 const ExamResultsList: React.FC = () => {
@@ -87,10 +87,10 @@ const ExamResultsList: React.FC = () => {
   const startEdit = (r: ExamResult) => {
     setEditId(r._id);
     setEditForm({
-      unit: r.unit,
-      cam1: r.cam1?.score.toString() || '0',
-      cam2: r.cam2?.score.toString() || '0',
-      cam3: r.cam3?.score.toString() || '0',
+      unit: r.unit || '',
+      cam1: r.cam1?.score?.toString() || '0',
+      cam2: r.cam2?.score?.toString() || '0',
+      cam3: r.cam3?.score?.toString() || '0',
       average: r.average?.toString() || '0'
     });
   };
@@ -99,8 +99,11 @@ const ExamResultsList: React.FC = () => {
     const { name, value } = e.target;
     setEditForm(prev => {
       const updated = { ...prev, [name]: value };
-      const camScores = ['cam1', 'cam2', 'cam3'].map(k => parseFloat(updated[k as keyof typeof updated]));
-      if (camScores.every(score => !isNaN(score))) {
+      const camScores = ['cam1', 'cam2', 'cam3'].map(k => {
+        const score = parseFloat(updated[k as keyof typeof updated]);
+        return isNaN(score) ? 0 : score;
+      });
+      if (camScores.every(score => score >= 0)) {
         updated.average = (camScores.reduce((a, b) => a + b, 0) / 3).toFixed(2);
       }
       return updated;
@@ -202,7 +205,14 @@ const ExamResultsList: React.FC = () => {
           <tbody>
             {results.map(r => {
               const isEditing = editId === r._id;
-              const studentLabel = typeof r.student === 'string' ? r.student : `${r.student.firstName} ${r.student.lastName} (${r.student.email})`;
+              // Add proper null checks for student object
+              let studentLabel = 'Unknown Student';
+              if (typeof r.student === 'string') {
+                studentLabel = r.student;
+              } else if (r.student && typeof r.student === 'object') {
+                studentLabel = `${r.student.firstName || 'Unknown'} ${r.student.lastName || ''} (${r.student.email || 'No email'})`;
+              }
+              
               return (
                 <tr key={r._id} style={{ background: '#23232b', borderBottom: '1px solid #444' }}>
                   <td>{studentLabel}</td>
@@ -223,11 +233,11 @@ const ExamResultsList: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <td>{r.unit}</td>
-                      <td>{r.cam1.score}/{r.cam1.outOf}</td>
-                      <td>{r.cam2.score}/{r.cam2.outOf}</td>
-                      <td>{r.cam3.score}/{r.cam3.outOf}</td>
-                      <td>{r.average}%</td>
+                      <td>{r.unit || 'N/A'}</td>
+                      <td>{r.cam1?.score || 0}/{r.cam1?.outOf || 0}</td>
+                      <td>{r.cam2?.score || 0}/{r.cam2?.outOf || 0}</td>
+                      <td>{r.cam3?.score || 0}/{r.cam3?.outOf || 0}</td>
+                      <td>{r.average || 0}%</td>
                       <td><button onClick={() => startEdit(r)} style={{ background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, padding: '0.3rem 1rem', fontWeight: 600 }}>Edit</button></td>
                       <td><button onClick={() => deleteResult(r._id)} disabled={deleting === r._id} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, padding: '0.3rem 1rem', fontWeight: 600 }}>{deleting === r._id ? 'Deleting...' : 'Delete'}</button></td>
                     </>
